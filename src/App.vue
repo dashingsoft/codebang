@@ -6,7 +6,7 @@
           <img src="./assets/logo.png">
           <span>CodeBang</span>
         </div>
-        <div class="cb-searchbox">
+        <div class="cb-searchbox" style="display: none;">
           <el-input
             placeholder="请输入搜素内容"
             prefix-icon="el-icon-search"
@@ -15,28 +15,35 @@
             v-model="searchText">
           </el-input>
         </div>
-        <el-button type="text" @click="handleNewFile">代码</el-button>
-        <el-button type="text" @click="handleNewFile">编译</el-button>
-        <el-button type="text" @click="handleNewFile">运行</el-button>
+        <el-button
+          @click="handleNewFile"
+          type="text">代码</el-button>
+        <el-button
+          @click="handleNewFile"
+          type="text">编译</el-button>
+        <el-button
+          @click="handleNewFile"
+          type="text">运行</el-button>
+        <div class="cb-title">
+          {{ title }}
+          <el-button
+            icon="el-icon-edit"
+            size="small"
+            type="text"></el-button>
+        </div>
         <div class="cb-toolbox">
-          <el-button size="small" type="text" icon="el-icon-bell"></el-button>
+          <el-button
+            size=""
+            icon="el-icon-bell"
+            type="text"></el-button>
           <el-dropdown trigger="click">
-            <el-button size="small" type="text" class="el-icon-plus">
-              <i class="el-icon-caret-bottom"></i>
-            </el-button>
-            <el-dropdown-menu slot="dropdown">
-              <el-dropdown-item>课程</el-dropdown-item>
-              <el-dropdown-item>文件</el-dropdown-item>
-            </el-dropdown-menu>
-          </el-dropdown>
-          <el-dropdown trigger="click">
-            <el-button size="small" type="text" class="el-icon-user">
+            <el-button size="" type="text" class="el-icon-user">
               <i class="el-icon-caret-bottom"></i>
             </el-button>
             <el-dropdown-menu slot="dropdown">
               <el-dropdown-item>登陆</el-dropdown-item>
               <el-dropdown-item>注销</el-dropdown-item>
-              <el-dropdown-item>设置</el-dropdown-item>
+              <el-dropdown-item>个人偏好设置</el-dropdown-item>
             </el-dropdown-menu>
           </el-dropdown>
         </div>
@@ -62,7 +69,12 @@
             <div id="editor" class="cb-editor"></div>
           </el-main>
         </el-container>
-        <div class="cb-container hidden"></div>
+        <div class="cb-container hidden">
+          <cb-builder></cb-builder>
+        </div>
+        <div class="cb-container hidden">
+          <cb-runner></cb-runner>
+        </div>
       </div>
     </el-container>
   </div>
@@ -78,7 +90,7 @@ export default {
     },
     data() {
         return {
-            title: "新文件",
+            title: 'Hello World',
             editor: null,
             filename: '',
             searchText: '',
@@ -186,6 +198,7 @@ body {
 
 .cb-titlebar > *:last-child {
     margin-left: auto;
+    padding-right: 0;
 }
 
 .cb-titlebar input {
@@ -206,6 +219,14 @@ body {
     padding-left: 9px;
 }
 
+.cb-title {
+    background-color: #3f3f3f;
+    flex-grow: 1;
+    text-align: center;
+    margin-left: 16px;
+    margin-right: 16px;
+}
+
 .cb-brand {
     display: inline-table;
 }
@@ -218,13 +239,6 @@ body {
 }
 .cb-brand span {
     display: table-cell;
-    vertical-align: middle;
-}
-
-.cb-title {
-    display: table-cell;
-    width: 100%;
-    text-align: center;
     vertical-align: middle;
 }
 

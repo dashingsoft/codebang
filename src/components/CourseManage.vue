@@ -1,20 +1,31 @@
 <template>
   <div class="cb-course-manage cb-container">
     <el-card class="cb-container">
-      <div>课程管理</div>
-      <!--   <el-button type="text" icon="el-icon-folder-add"></el-button> -->
-      <!--   <el-button type="text" icon="el-icon-document-add"></el-button> -->
-      <!--    -->
-      <el-select v-model="course"
-                 class="w-100"
-                 filterable
-                 clearable
-                 placeholder="请选择课程">
-        <el-button slot="prefix"
-                   title="删除当前课程以及所有相关文件"
-                   v-show="course"
-                   type="text"
-                   icon="el-icon-delete"></el-button>
+      <div class="cb-titlebar">
+        <span>课程管理</span>
+        <div class="cb-toolbox">
+          <el-button
+            title="删除当前课程和相关的课程文件"
+            type="text"
+            :disabled="!course"
+            icon="el-icon-delete"></el-button>
+          <el-button
+            title="修改课程名称"
+            type="text"
+            :disabled="!course"
+            icon="el-icon-edit"></el-button>
+          <el-button
+            title="新增课程"
+            type="text"
+            icon="el-icon-document-add"></el-button>
+        </div>
+      </div>
+      <el-select
+        v-model="course"
+        class="w-100"
+        filterable
+        clearable
+        placeholder="请选择课程">
         <el-option
           v-for="item in options"
           :key="item.value"
@@ -37,29 +48,43 @@
           align="right"
           width="80">
           <template slot="header">
-            <el-button title="保存全部修改过的内容"
-                       type="primary"
-                       plain
-                       size="mini"
-                       icon="el-icon-document-copy"></el-button>
-            <el-button title="新增文件"
-                       type="primary"
-                       plain
-                       size="mini"
-                       icon="el-icon-plus"></el-button>
+            <el-button
+              title="新增文件"
+              type="primary"
+              plain
+              size="mini"
+              icon="el-icon-plus"></el-button>
+            <el-button
+              title="保存文件"
+              type="primary"
+              plain
+              size="mini"
+              icon="el-icon-document-copy"></el-button>
           </template>
           <template slot-scope="scope">
-            <el-button title="编译和运行"
-                       type="primary"
-                       plain
-                       size="mini"
-                       icon="el-icon-position"
-                       @click="handleEdit(scope.$index, scope.row)"></el-button>
-            <el-button type="danger" size="mini" icon="el-icon-delete" plain></el-button>
+            <el-button
+              title="删除文件"
+              type="danger"
+              size="mini"
+              icon="el-icon-delete"
+              plain></el-button>
+            <el-dropdown trigger="hover">
+              <el-button
+                size="mini"
+                type="primary"
+                plain
+                class="el-icon-more">
+            </el-button>
+              <el-dropdown-menu slot="dropdown">
+                <el-dropdown-item
+                  @click="handleEdit(scope.$index, scope.row)">编译和运行</el-dropdown-item>
+                <el-dropdown-item>切换折行模式</el-dropdown-item>
+                <el-dropdown-item>切换Tab宽度(4)</el-dropdown-item>
+              </el-dropdown-menu>
+            </el-dropdown>
           </template>
         </el-table-column>
       </el-table>
-
     </el-card>
   </div>
 </template>
@@ -67,25 +92,26 @@
 <script>
 
 export default {
-  name: 'CourseManage',
-  props: {
-msg: String,
-course: String,
-},
-data() {
-      return {
-        options: [{
-          value: '选项1',
-          label: '黄金糕'
-        }, {
-          value: '选项2',
-          label: '双皮奶'
-}],
+    name: 'CourseManage',
+    props: {
+        msg: String,
+        course: String,
+    },
+    data() {
+        return {
+            options: [{
+                value: '选项1',
+                label: '黄金糕'
+            }, {
+                value: '选项2',
+                label: '双皮奶'
+            }],
 
-tableData: [{
-          filename: 'foo.c',
-        }, { filename: 'this is a very long.c' } ],
-} },
+            tableData: [{
+                filename: 'foo.c',
+            }, { filename: 'this is a very long.c' } ],
+        }
+    },
 }
 </script>
 
@@ -125,7 +151,7 @@ tableData: [{
 .cb-course-manage .el-card .el-table .el-table__body tr > td:last-child {
     border-right: 1px solid #666;
 }
- 
+
 .cb-course-manage .el-card .el-table::before,
 .cb-course-manage .el-card .el-table .el-table__fixed-right::before {
     background-color: #666;
@@ -149,8 +175,9 @@ tableData: [{
     cursor: pointer;
 }
 
-.cb-course-manage .el-card__body .el-table .el-button {
+.cb-course-manage .el-card__body .el-button {
     padding: 2px 6px;
+    margin-left: 6px;
 }
 
 .cb-course-manage .el-card__body .el-table .is-right > .cell {
