@@ -1,27 +1,68 @@
 <template>
   <div id="app">
     <el-container>
-      <el-header class="cb-brand">
+      <el-header class="cb-titlebar">
+        <div class="cb-brand">
           <img src="./assets/logo.png">
           <span>CodeBang</span>
-          <div class="cb-title">{{ title }}</div>
+        </div>
+        <div class="cb-searchbox">
+          <el-input
+            placeholder="请输入搜素内容"
+            prefix-icon="el-icon-search"
+            size="mini"
+            clearable
+            v-model="searchText">
+          </el-input>
+        </div>
+        <el-button type="text" @click="handleNewFile">代码</el-button>
+        <el-button type="text" @click="handleNewFile">编译</el-button>
+        <el-button type="text" @click="handleNewFile">运行</el-button>
+        <div class="cb-toolbox">
+          <el-button size="small" type="text" icon="el-icon-bell"></el-button>
+          <el-dropdown trigger="click">
+            <el-button size="small" type="text" class="el-icon-plus">
+              <i class="el-icon-caret-bottom"></i>
+            </el-button>
+            <el-dropdown-menu slot="dropdown">
+              <el-dropdown-item>课程</el-dropdown-item>
+              <el-dropdown-item>文件</el-dropdown-item>
+            </el-dropdown-menu>
+          </el-dropdown>
+          <el-dropdown trigger="click">
+            <el-button size="small" type="text" class="el-icon-user">
+              <i class="el-icon-caret-bottom"></i>
+            </el-button>
+            <el-dropdown-menu slot="dropdown">
+              <el-dropdown-item>登陆</el-dropdown-item>
+              <el-dropdown-item>注销</el-dropdown-item>
+              <el-dropdown-item>设置</el-dropdown-item>
+            </el-dropdown-menu>
+          </el-dropdown>
+        </div>
       </el-header>
-      <div class="cb-toolbar">
-        <el-row>
-          <el-button type="info" size="mini" @click="handleNewFile">新建</el-button>
-    <el-button type="info" size="mini" @click="handleOpenFile">打开
-          <input type="file" accept=".c,.cpp,.h,.hpp" style="display:none"
-                 @change="handleFiles">
-
-</el-button>
-          <el-button type="info" size="mini" @click="handleSaveFile">保存</el-button>
-          <el-button type="info" size="mini" @click="handleBuildFile">编译</el-button>
-          <el-button type="info" size="mini" @click="handleRunFile">运行</el-button>
-        </el-row>
-      </div>
+      <!-- <div class="cb-toolbar"> -->
+      <!--   <el-row> -->
+      <!--     <el-button type="info" size="mini" @click="handleNewFile">新建</el-button> -->
+      <!--     <el-button type="info" size="mini" @click="handleOpenFile">打开 -->
+      <!--       <input type="file" accept=".c,.cpp,.h,.hpp" style="display:none" -->
+      <!--              @change="handleFiles"> -->
+      <!--     </el-button> -->
+      <!--     <el-button type="info" size="mini" @click="handleSaveFile">保存</el-button> -->
+      <!--     <el-button type="info" size="mini" @click="handleBuildFile">编译</el-button> -->
+      <!--     <el-button type="info" size="mini" @click="handleRunFile">运行</el-button> -->
+      <!--   </el-row> -->
+      <!-- </div> -->
       <div class="cb-main">
-        <div id="editor" class="cb-editor"></div>
-        <div class="cb-pixie hidden"></div>
+        <el-container class="cb-container">
+          <el-aside style="padding: 2px">
+            <cb-course-manage></cb-course-manage>
+          </el-aside>
+          <el-main style="padding: 0 2px 2px 2px;">
+            <div id="editor" class="cb-editor"></div>
+          </el-main>
+        </el-container>
+        <div class="cb-container hidden"></div>
       </div>
     </el-container>
   </div>
@@ -33,11 +74,14 @@ import 'ace-builds/webpack-resolver';
 
 export default {
     name: 'app',
+    components: {
+    },
     data() {
         return {
             title: "新文件",
             editor: null,
             filename: '',
+            searchText: '',
         }
     },
     mounted() {
@@ -57,9 +101,8 @@ export default {
         });
         // editor.renderer.setScrollMargin(10, 10, 10, 10);
         this.editor.getSession().setUseWrapMode(true);
+        this.editor.getSession().setTabSize(8);
         this.editor.focus();
-    },
-    components: {
     },
     methods: {
         handleNewFile: function () {
@@ -76,7 +119,7 @@ export default {
         handleFiles: function () {
             var file = this.$el.querySelector('input[type="file"]').files[0];
             this.title = file.name;
-            // this.title = file.webkitRelativePath;            
+            // this.title = file.webkitRelativePath;
             var reader = new FileReader();
             reader.onload = function (evt) {
                 this.editor.setValue(evt.target.result);
@@ -87,6 +130,20 @@ export default {
             reader.readAsText(file);
         },
         handleSaveFile: function () {
+            var text = this.editor.getValue();
+            if (text.length > 0) {
+                var blob = new Blob([text], {type: 'text/plain'});
+                var reader = new FileReader();
+                reader.onload = function (evt) {
+                    var a = document.createElement('a');
+                    a.href = evt.target.result;
+                    a.setAttribute('download', this.filename);
+                    a.click();
+                }.bind(this);
+                reader.readAsDataURL(blob);
+                // var url = URL.createObjectURL(blob);
+                // URL.revokeObjectURL(url);
+            }
         },
         handleBuildFile: function () {
         },
@@ -117,6 +174,38 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+.cb-titlebar {
+    display: flex;
+    flex-direction: col;
+    align-items: center;
+}
+
+.cb-titlebar > * {
+    padding-right: 16px;
+}
+
+.cb-titlebar > *:last-child {
+    margin-left: auto;
+}
+
+.cb-titlebar input {
+    background-color: #555;
+    border: 0;
+    color: #eee;
+}
+
+.cb-titlebar .el-button--text {
+    color: #f8f8f8;
+}
+
+.cb-titlebar .el-button--text:hover {
+    color: #ccc;
+}
+
+.cb-toolbox > * {
+    padding-left: 9px;
+}
+
 .cb-brand {
     display: inline-table;
 }
@@ -125,28 +214,26 @@ body {
     vertical-align: middle;
     width: 32px;
     height: 32px;
-    padding: 12px 6px;
+    padding: 12px 6px 12px 0;
 }
 .cb-brand span {
     display: table-cell;
     vertical-align: middle;
 }
+
 .cb-title {
     display: table-cell;
     width: 100%;
     text-align: center;
     vertical-align: middle;
 }
-.cb-toolbar {
-    padding: 0px 20px 9px 20px;
-}
-.cb-main {
-}
+
 .cb-editor {
     width: 100%;
     height: 100%;
 }
-.cb-pixie {
+
+.cb-container {
     width: 100%;
     height: 100%;
 }
