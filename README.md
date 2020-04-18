@@ -2,6 +2,8 @@
 
 ## Project setup
 ```
+vue create .
+
 npm install
 npm install -S vce-builds
 npm install -S pixi.js
