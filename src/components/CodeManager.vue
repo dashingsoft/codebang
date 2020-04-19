@@ -35,13 +35,13 @@
         filterable
         clearable
         remote
-        :remote-method="remoteMethod"
+        :remote-method="onSearchCourse"
         :loading="loadingCourse"
         placeholder="请选择课程">
         <el-option
-          v-for="(index, item) in matchedCourses"
+          v-for="(item, index) in matchedCourses"
           :key="item.id"
-          :label="item.name"
+          :label="item.title"
           :value="index">
         </el-option>
       </el-select>
@@ -73,7 +73,7 @@
               plain
               size="mini"
               icon="el-icon-document-copy"
-              @click="handleCourseworkSave(scope.row)"></el-button>
+              @click="handleCourseworkSave(scope.$index)"></el-button>
           </template>
           <template slot-scope="scope">
             <el-button
@@ -82,7 +82,7 @@
               size="mini"
               plain
               icon="el-icon-position"
-              @click="handleCourseworkBuild(scope.$index, scope.row)"></el-button>
+              @click="handleCourseworkBuild(scope.$index)"></el-button>
             <el-dropdown trigger="hover">
               <el-button
                 size="mini"
@@ -92,7 +92,7 @@
             </el-button>
               <el-dropdown-menu slot="dropdown">
                 <el-dropdown-item
-                  @click="handleCourseworkRemove(scope.$index, scope.row)">删除
+                  @click="handleCourseworkRemove(scope.$index)">删除
                 </el-dropdown-item>
                 <el-dropdown-item divided>切换折行模式</el-dropdown-item>
                 <el-dropdown-item>切换Tab宽度(4)</el-dropdown-item>
@@ -136,24 +136,18 @@ export default {
         connector.$on('api-logout', this.onLogout)
     },
     methods: {
-        remoteMethod(query) {
-            if (this.courseData === undefined) {
-                this.loadingCourse = true
-                this.queryCourses()
-            }
-            else {
-                this.loadingCourse = false
-                if (query === '') {
-                    this.matchedCourses = this.courseData
-                }
-                else {
-                    this.matchedCourses = this.courseData.filter( item => {
-                        return item.title.indexOf(query) > -1
-                    } )
-                }
-            }
-         },
-
+        clearData() {
+            this.courseIndex = undefined
+            this.courseworkIndex = undefined
+            this.courseData = undefined
+            this.matchedCourses = []
+            this.courseworkData = []
+            this.loadingCourse = false
+        },
+        refreshData() {
+            this.clearData()
+            this.queryCourses()
+        },
         queryCourses() {
             connector.$once('api-list-courses', this.onListCourses)
             connector.listCourses()
@@ -162,18 +156,19 @@ export default {
             connector.$once('api-list-course-items', this.onListCourseItems)
             connector.listCourseItems(course)
         },
-        clearData() {
-            this.courseIndex = undefined
-            this.courseworkIndex = undefined
-            this.courseData = undefined
-            this.matchedCourses = []
-            this.courseworkData = []
-        },
-        refreshData() {
-            this.clearData()
-            this.queryCourses()
-        },
 
+        onSearchCourse: function (query) {
+            if (this.courseData === undefined) {
+                this.loadingCourse = true
+                this.queryCourses()
+            }
+            else {
+                this.loadingCourse = false
+                this.matchedCourses = this.courseData.filter( item => {
+                    return item.title.indexOf(query) > -1
+                } )
+            }
+         },
         onLogin: function (success) {
             if (success)
                 this.refreshData()
@@ -184,32 +179,32 @@ export default {
         },
         onListCourses: function (success, data) {
             this.loadingCourse = false
-            if (success)
+            if (success) {
                 this.courseData = data
+                this.matchedCourses = data
+            }
         },
         onListCourseItems: function (success, data) {
             if (success)
                 this.courseworkData = data
         },
         onCourseCreated: function (success, data) {
-            if (!success)
-                return
-
-            this.courseData.append(data)
-            this.courseIndex = this.courseData.length - 1
+            if (success) {
+                this.courseData.push(data)
+                this.matchedCourses.push(data)
+                this.courseIndex = this.matchedCourses.length - 1
+            }
         },
-        onRemoveCourse: function (success) {
-            if (!success)
-                return
-
-            let course = this.currentCourse
-            if (!course)
-                return
+        onCourseRemoved: function (success) {
+            if (success && this.currentCourse) {
+                this.courseworkIndex = undefined
+                this.courseworkData = []
+            }
         },
 
         handleCourseAdd: function () {
             this.$prompt('请输入课程名称', '创建课程', {
-                inputValue: 'hello-world.c',
+                inputValue: 'foo.c',
                 confirmButtonText: '确定',
                 cancelButtonText: '取消',
             }).then(({ value }) => {
@@ -234,7 +229,7 @@ export default {
                     cancelButtonText: '取消',
                     type: 'warning'
                 }).then(() => {
-                    connector.$once('api-remove-course', this.onRemoveCourse)
+                    connector.$once('api-remove-course', this.onCourseRemoved)
                     connector.removeCourse(course)
                 })
             }
@@ -252,23 +247,28 @@ export default {
             }
         },
 
-        handleCourseworkChange: function () {
+        handleCourseworkChange: function (index) {
+            this.courseworkIndex = index
         },
         handleCourseworkAdd: function () {
         },
-        handleCourseworkSave: function (coursework) {
+        handleCourseworkSave: function () {
+            const coursework = this.courseworkIndex
             connector.$once('api-update-coursework', this.onUpdateCoursewrok)
             connector.updateCoursework(coursework)
         },
-        handleCourseworkUpdate: function (coursework) {
+        handleCourseworkUpdate: function (index) {
+            const coursework = this.courseworkData[index]
             connector.$once('api-update-coursework', this.onUpdateCoursewrok)
             connector.updateCoursework(coursework)
         },
-        handleCourseworkRemove: function (coursework) {
+        handleCourseworkRemove: function (index) {
+            const coursework = this.courseworkData[index]
             connector.$once('api-remove-coursework', this.onRemoveCoursewrok)
             connector.removeCoursework(coursework)
         },
-        handleCourseworkBuild: function (coursework) {
+        handleCourseworkBuild: function (index) {
+            const coursework = this.courseworkData[index]
             connector.$once('api-build-coursework', this.onBuildCoursewrok)
             connector.buildCoursework(coursework)
         },

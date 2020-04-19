@@ -166,9 +166,9 @@ const request_api = function (api, method, paras, callback, complete) {
 // }
 
 export default new Vue({
-    data() {
-        return {
-            connected: false,
+    computed: {
+        isAuthenticated: function () {
+            return is_authenticated()
         }
     },
     methods: {
@@ -227,16 +227,16 @@ export default new Vue({
         },
         login: function (username, password, silent) {
             const callback = function (success, result) {
-                if (!success && !silent && result.message)
-                    this.showError(result.message)
+                if (!success && !silent)
+                    this.showError(result.message ? result.message : '登陆失败，错误未知')
                 this.$emit('api-login', success, result)
             }.bind(this)
             get_token(username, password, callback)
         },
         logout: function (silent) {
             const callback = function (success, result) {
-                if (!success && !silent && result.message)
-                    this.showError(result.message)
+                if (!success && !silent)
+                    this.showError(result.message ? result.message : '注销失败，错误未知')
                 this.$emit('api-logout', success, result)
             }.bind(this)
             revoke_token(callback)

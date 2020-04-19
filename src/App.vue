@@ -42,7 +42,7 @@
             </el-button>
             <el-dropdown-menu slot="dropdown">
               <template v-if="isAuthenticated">
-                <span>登陆为 {{ userName }}</span>
+                <el-dropdown-item disabled>登陆为 {{ logonName }}</el-dropdown-item>
                 <el-dropdown-item command="logout" divided>注销</el-dropdown-item>
               </template>
               <template v-else>
@@ -95,23 +95,26 @@ export default {
     name: 'app',
     computed: {
         displayTitle: function () {
-            return this.activeBuffer ? this.activeBuffer.filename : ''
-        }
+            return ''
+        },
     },
     data() {
         return {
-            userName: '',
+            logonName: '',
             isAuthenticated: false,
-            buffers: [],
-            activeBuffer: null,
             activePage: 0,
             editor: null
         }
     },
     mounted() {
-        connector.$on('api-login', this.onLogin)
-        connector.$on('api-logout', this.onLogout)
-
+        connector.$on( 'api-login', (success) => {
+            this.isAuthenticated = success
+        } )
+        connector.$on( 'api-logout', (success) => {
+            this.isAuthenticated = !success
+        } )
+        this.isAuthenticated = connector.isAuthenticated
+        
         var main = this.$el.querySelector('.cb-main');
         var rect = main.previousElementSibling.getBoundingClientRect();
         main.style.height = (window.innerHeight - rect.bottom) + 'px';
@@ -132,21 +135,13 @@ export default {
         this.editor.focus();
     },
     methods: {
-        onLogin: function (success) {
-            this.isAuthenticated = success
-        },
-        onLogout: function (success) {
-            if (success)
-                this.isAuthenticated = false
-        },
-
         handleUserMenu: function (command) {
             if (command == 'login')
                 connector.login('admin', 'admin')
             else if (command == 'logout')
                 connector.logout()
         },
-        
+
         handleNewFile: function () {
             this.editor.setValue(
                 '#include <stdio.h>\n\nint main(int argc, char *argv[])\n' +
