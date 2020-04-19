@@ -193,7 +193,7 @@ export default new Vue({
                 if (success)
                     this.sendRequest(api, paras, event, options)
                 else {
-                    if (!silent && result.message)
+                    if (!silent)
                         this.showError(result.message)
                     this.$emit(event, success, result)
                 }
@@ -202,11 +202,11 @@ export default new Vue({
             const callback = function (success, result) {
                 if (success)
                     this.$emit(event, true, result)
-                else if (result.status === 401 && is_authenticated() && 0) {
+                else if (result.status === 401 && is_authenticated()) {
                     refresh_token(retry_callback)
                 }
                 else {
-                    if (!silent && result.message)
+                    if (!silent)
                         this.showError(result.message)
                     this.$emit(event, false, result)
                 }
@@ -228,7 +228,7 @@ export default new Vue({
         login: function (username, password, silent) {
             const callback = function (success, result) {
                 if (!success && !silent)
-                    this.showError(result.message ? result.message : '登陆失败，错误未知')
+                    this.showError(result.message)
                 this.$emit('api-login', success, result)
             }.bind(this)
             get_token(username, password, callback)
@@ -236,10 +236,14 @@ export default new Vue({
         logout: function (silent) {
             const callback = function (success, result) {
                 if (!success && !silent)
-                    this.showError(result.message ? result.message : '注销失败，错误未知')
+                    this.showError(result.message)
                 this.$emit('api-logout', success, result)
             }.bind(this)
             revoke_token(callback)
+        },
+        getLogon: function () {
+            const api = '/users/info/'
+            this.sendRequest(api, {}, 'api-get-logon', {silent: true})
         },
         newCourse: function (course) {
             const api = '/api/courses/'

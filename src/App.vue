@@ -109,11 +109,19 @@ export default {
     mounted() {
         connector.$on( 'api-login', (success) => {
             this.isAuthenticated = success
+            if (success)
+                connector.getLogon()
         } )
         connector.$on( 'api-logout', (success) => {
             this.isAuthenticated = !success
         } )
+        connector.$on( 'api-get-logon', (success, data) => {
+            if (success)
+                this.logonName = data.username
+        } )
         this.isAuthenticated = connector.isAuthenticated
+        if (this.isAuthenticated)
+            connector.getLogon()
         
         var main = this.$el.querySelector('.cb-main');
         var rect = main.previousElementSibling.getBoundingClientRect();
