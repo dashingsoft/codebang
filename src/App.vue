@@ -27,6 +27,7 @@
         <div class="cb-title">
           {{ title }}
           <el-button
+            title="修改文件名称"
             icon="el-icon-edit"
             size="small"
             type="text"></el-button>
@@ -81,8 +82,8 @@
 </template>
 
 <script>
-import ace from 'ace-builds';
-import 'ace-builds/webpack-resolver';
+import ace from 'ace-builds'
+import 'ace-builds/webpack-resolver'
 
 export default {
     name: 'app',
