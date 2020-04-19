@@ -11,40 +11,44 @@
             placeholder="请输入搜素内容"
             prefix-icon="el-icon-search"
             size="mini"
-            clearable
-            v-model="searchText">
+            clearable>
           </el-input>
         </div>
         <el-button
-          @click="handleNewFile"
+          @click="activePage=0"
           type="text">代码</el-button>
         <el-button
-          @click="handleNewFile"
+          @click="activePage=1"
           type="text">编译</el-button>
         <el-button
-          @click="handleNewFile"
+          @click="activePage=2"
           type="text">运行</el-button>
         <div class="cb-title">
           {{ title }}
           <el-button
             title="修改文件名称"
+            v-show="!!title"
             icon="el-icon-edit"
             size="small"
             type="text"></el-button>
         </div>
         <div class="cb-toolbox">
           <el-button
-            size=""
             icon="el-icon-bell"
             type="text"></el-button>
-          <el-dropdown trigger="click">
+          <el-dropdown trigger="click" @command="handleUserMenu">
             <el-button size="" type="text" class="el-icon-user">
               <i class="el-icon-caret-bottom"></i>
             </el-button>
             <el-dropdown-menu slot="dropdown">
-              <el-dropdown-item>登陆</el-dropdown-item>
-              <el-dropdown-item>注销</el-dropdown-item>
-              <el-dropdown-item>个人偏好设置</el-dropdown-item>
+              <template v-if="isAuthenticated">
+                <span>登陆为 {{ userName }}</span>
+                <el-dropdown-item command="logout" divided>注销</el-dropdown-item>
+              </template>
+              <template v-else>
+                <el-dropdown-item command="login">登陆</el-dropdown-item>
+              </template>
+              <el-dropdown-item command="profile" divided>偏好设置</el-dropdown-item>
             </el-dropdown-menu>
           </el-dropdown>
         </div>
@@ -62,7 +66,7 @@
       <!--   </el-row> -->
       <!-- </div> -->
       <div class="cb-main">
-        <el-container class="cb-container">
+        <el-container class="cb-container" v-show="!activePage">
           <el-aside style="padding: 2px">
             <cb-course-manage></cb-course-manage>
           </el-aside>
@@ -70,11 +74,11 @@
             <div id="editor" class="cb-editor"></div>
           </el-main>
         </el-container>
-        <div class="cb-container hidden">
-          <cb-builder></cb-builder>
+        <div class="cb-container" v-show="activePage==1">
+          <!-- <cb-builder></cb-builder> -->
         </div>
-        <div class="cb-container hidden">
-          <cb-runner></cb-runner>
+        <div class="cb-container" v-show="activePage==2">
+          <!-- <cb-runner></cb-runner> -->
         </div>
       </div>
     </el-container>
@@ -85,19 +89,29 @@
 import ace from 'ace-builds'
 import 'ace-builds/webpack-resolver'
 
+import connector from './connector.js'
+
 export default {
     name: 'app',
-    components: {
+    computed: {
+        title: function () {
+            return this.activeBuffer ? this.activeBuffer.filename : ''
+        }
     },
     data() {
         return {
-            title: 'Hello World',
-            editor: null,
-            filename: '',
-            searchText: '',
+            userName: '',
+            isAuthenticated: false,
+            buffers: [],
+            activeBuffer: null,
+            activePage: 0,
+            editor: null
         }
     },
     mounted() {
+        connector.$on('api-login', this.onLogin)
+        connector.$on('api-logout', this.onLogout)
+
         var main = this.$el.querySelector('.cb-main');
         var rect = main.previousElementSibling.getBoundingClientRect();
         main.style.height = (window.innerHeight - rect.bottom) + 'px';
@@ -118,6 +132,21 @@ export default {
         this.editor.focus();
     },
     methods: {
+        onLogin: function (success) {
+            this.isAuthenticated = success
+        },
+        onLogout: function (success) {
+            if (success)
+                this.isAuthenticated = false
+        },
+
+        handleUserMenu: function (command) {
+            if (command == 'login')
+                connector.login('admin', 'admin')
+            else if (command == 'logout')
+                connector.logout()
+        },
+        
         handleNewFile: function () {
             this.editor.setValue(
                 '#include <stdio.h>\n\nint main(int argc, char *argv[])\n' +
@@ -158,10 +187,6 @@ export default {
                 // URL.revokeObjectURL(url);
             }
         },
-        handleBuildFile: function () {
-        },
-        handleRunFile: function () {
-        }
     }
 }
 </script>

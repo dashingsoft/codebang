@@ -4,22 +4,24 @@ import reqwest from './reqwest.js'
 const serverUrl = 'http://localhost:9092'
 
 const ACCESS_TOKEN_KEY = 'ACCESS_TOKEN'
-const REFERSH_TOKEN_KEY = 'REFRESH_TOKEN'
+const REFRESH_TOKEN_KEY = 'REFRESH_TOKEN'
 
 const clientId = '0gvr1GFNpCy9fSpxsKHPdUPUu7ZSCQS76zc8kAgl'
 const clientSecret = 'dazoA4IhCGrWrkh2rA02FE1qm3AVWdAz9qKqSZDLAD22xWiVYsEeMtq2BmqVY748U8Qw9jecBo9BHYYG3nZDgOUUwaEFjjDir1VX25ejnCvEcwdzV3Wt2Rxcnt45lxaN'
 
 // Fix this issue:
 //   Do not access Object.prototype method ‘hasOwnProperty’ from target object no-prototype-builtins
-const hasOwnProperty = Object.prototype.hasOwnProperty.call
+const hasOwnProperty = function (obj, name) {
+    return obj && Object.prototype.hasOwnProperty.call(obj, name)
+}
 
 // For debug
-const crossOrigin = true;
+const crossOrigin = true
 
 let cachedData = {}
 
 const get_key = function (key) {
-    if (Object.prototype.hasOwnProperty(cachedData, key) && cachedData[key])
+    if (hasOwnProperty(cachedData, key) && cachedData[key])
         return cachedData[key]
     cachedData[key] = window.localStorage.getItem(key)
     return cachedData[key]
@@ -37,17 +39,34 @@ const set_key = function (key, value) {
         window.localStorage.setItem(key, value)
     }
     catch (e) {
-        Vue.prototype.$message({
+        Vue.prototype.$message( {
             type: 'warning',
             message: '当前浏览器无法保存登陆信息，关闭页面之后登陆信息会丢失',
             showClose: true,
             duration: 0
-        })
+        } )
     }
 }
 
 const is_authenticated = function () {
-    return !!get_key(ACCESS_TOKEN_KEY)
+    return get_key(ACCESS_TOKEN_KEY)
+}
+
+const error_callback = function (req, msg, err) {
+    let response = req.response
+    if (typeof req.response === 'string' &&
+        req.response[0] === '{' && req.response.slice(-1) === '}')
+        response = JSON.parse(req.response)
+    this( false, {
+        status: req.status,
+        statusText: req.statusText,
+        message: msg ? msg :
+            req.status === 0 ? '无法发送请求到服务器' :
+            hasOwnProperty(response, 'error') ?  response.error :
+            hasOwnProperty(response, 'detail') ? response.detail :
+            hasOwnProperty(err, 'message') ? err.message :
+            '发送请求到服务器发生了未知错误'
+    } )
 }
 
 const request_token = function (url, data, callback) {
@@ -55,27 +74,18 @@ const request_token = function (url, data, callback) {
         url: url,
         method: 'post',
         type: 'json',
-        contentType: 'application/json',
+        contentType: 'application/x-www-form-urlencoded',
         headers: {
             Authorization: 'Basic ' + btoa(clientId + ':' + clientSecret)
         },
         data: data,
         crossOrigin: crossOrigin,
-        success: function (data) {
+        success: function (result) {
             set_key(ACCESS_TOKEN_KEY, data['access_token'])
             set_key(REFRESH_TOKEN_KEY, data['refresh_token'])
-            callback(true)
+            callback(true, result)
         },
-        error: function (r, msg, err) {
-            callback( false, {
-                status: r.status,
-                statusText: r.statusText,
-                message: !!msg ? msg :
-                    hasOwnProperty(r.response, 'error') ? r.response.error :
-                    hasOwnProperty(err, 'message') ? err.message :
-                    ''
-            } )
-        }
+        error: error_callback.bind(callback)
     } )
 }
 
@@ -89,7 +99,7 @@ const get_token = function (username, password, callback) {
     request_token(url, data, callback)
 }
 
-const refresh_token = function (callback) {
+ const refresh_token = function (callback) {
     const url = serverUrl + '/o/token/'
     const data = {
         grant_type: 'refresh_token',
@@ -100,7 +110,7 @@ const refresh_token = function (callback) {
     request_token(url, data, callback)
 }
 
-const revoke_token(callback) {
+const revoke_token = function (callback) {
     const url = serverUrl + '/o/revoke_token/'
     const data = {
         token: get_key(ACCESS_TOKEN_KEY),
@@ -111,65 +121,49 @@ const revoke_token(callback) {
         url: url,
         method: 'post',
         type: 'json',
-        contentType: 'application/json',
+        contentType: 'application/x-www-form-urlencoded',
         data: data,
         crossOrigin: crossOrigin,
-        success: function (data) {
+        success: function (result) {
             set_key(ACCESS_TOKEN_KEY, null)
             set_key(REFRESH_TOKEN_KEY, null)
-            callback(true)
+            callback(true, result)
         },
-        error: function (r, msg, err) {
-            callback( false, {
-                status: r.status,
-                statusText: r.statusText,
-                message: !!msg ? msg :
-                    hasOwnProperty(r.response, 'error') ? r.response.error :
-                    hasOwnProperty(err, 'message') ? err.message :
-                    ''
-            } )
-        }
+        error: error_callback.bind(callback)
     } )
 }
 
-const request_api = function (api, method, data, callback, complete) {
+const request_api = function (api, method, paras, callback, complete) {
     const url = serverUrl + api.slice(-1) === '/' ? api : (api + '/')
     reqwest( {
         url: url,
         method: method,
-        type: 'json',
-        contentType: 'application/json',
+        type: hasOwnProperty(paras, 'responseType') ? paras.responseType : 'json',
+        contentType: paras.contentType,
         headers: {
             Authorization: 'Bearer ' + get_key(ACCESS_TOKEN_KEY)
         },
-        data: data,
+        data: paras.data,
         crossOrigin: crossOrigin,
-        success: function (data) {
-            callback(true, data)
+        success: function (result) {
+            callback(true, result)
         },
-        error: function (r, msg, err) {
-            callback( false, {
-                status: r.status,
-                statusText: r.statusText,
-                message: !!msg ? msg :
-                    hasOwnProperty(r.response, 'detail') ? r.response.detail :
-                    hasOwnProperty(err, 'message') ? err.message :
-                    ''
-            } )
-        },
+        error: error_callback.bind(callback),
         complete: complete
     } )
 }
 
-const upload_file = function (api, data, callback, complete) {
-    let file = new File( [filedata], filename, { type: 'text/plain' } )
-    paras.data = JSON.stringify( { file: file } )
-    paras.contentType = 'multipart/form-data'
-    reqwest( paras );
-}
+// const upload_file = function (api, data, callback) {
+//     let file = new File( [filedata], filename, { type: 'text/plain' } )
+//     paras.data = { source: file }
+//     paras.contentType = 'multipart/form-data'
+//     reqwest( paras );
+// }
 
-const download_file = function (api, callback, complete) {
-}
+// const download_file = function (api, callback) {
+//     paras.data = coursework
+//     paras.responseType = 'blob'
+// }
 
 export default new Vue({
     data() {
@@ -179,78 +173,77 @@ export default new Vue({
     },
     methods: {
         showError(err) {
-            Vue.prototype.$message({
+            Vue.prototype.$message( {
                 type: 'error',
                 message: err,
                 showClose: true,
-                duration: 0
-            })
+                duration: 15000
+            } )
         },
-        sendRequest: function (api, data, event, text) {
-            const method = event.startswith('api-new') ? 'post' :
-                  api.startswith('api-update') ? 'put' :
+        sendRequest(api, paras, event, options) {
+            let opt = !options ? {} : options
+            const loading = opt.loading
+            const silent =  opt.silent
+            const method = opt.method ? opt.method :
+                  event.startswith('api-new') ? 'post' :
+                  api.startswith('api-update') ? 'patch' :
                   api.startswith('api-remove') ? 'delete' : 'get'
-            const refresh_callback = function (success) {
+
+            const retry_callback = function (success, result) {
                 if (success)
-                    this.sendRequest(api, data, event, text)
+                    this.sendRequest(api, paras, event, options)
                 else {
-                    if (!!data.message)
-                        this.showError(data.message)
-                    this.$emit(event + '-fail')
+                    if (!silent && result.message)
+                        this.showError(result.message)
+                    this.$emit(event, success, result)
                 }
-            }
-            const callback = function (success, data) {
+            }.bind(this)
+
+            const callback = function (success, result) {
                 if (success)
-                    this.$emit(event, data)
-                else if (data.status === 401 && is_authenticated()) {
-                    refresh_token(refresh_callback)
+                    this.$emit(event, true, result)
+                else if (result.status === 401 && is_authenticated()) {
+                    refresh_token(retry_callback)
                 }
                 else {
-                    if (!!data.message)
-                        this.showError(data.message)
-                    this.$emit(event + '-fail')
+                    if (!silent && result.message)
+                        this.showError(result.message)
+                    this.$emit(event, false, result)
                 }
-            }
-            if (!text) {
-                request_api(api, method, data, callback)
+            }.bind(this)
+
+            if (!loading) {
+                request_api(api, method, paras, callback)
             }
             else {
-                const loading = this.$loading( {
+                const vnode = this.$loading( {
                     lock: true,
-                    text: text,
+                    text: loading,
                     spinner: 'el-icon-loading',
                     background: 'rgba(0, 0, 0, 0.7)'
                 } )
-                request_api(api, method, data, callback, loading.close)
+                request_api(api, method, paras, callback, vnode.close)
             }
         },
-        login(username, password) {
-            const callback = function (success) {
-                if (success)
-                    this.$emit('api-login')
-                else {
-                    if (!!data.message)
-                        this.showError(data.message)
-                    this.$emit('api-login-fail')
-                }
-            }
+        login: function (username, password, silent) {
+            const callback = function (success, result) {
+                if (!success && !silent && result.message)
+                    this.showError(result.message)
+                this.$emit('api-login', success, result)
+            }.bind(this)
             get_token(username, password, callback)
         },
-        logout() {
-            const callback = function (success) {
-                if (success)
-                    this.$emit('api-logout')
-                else {
-                    if (!!data.message)
-                        this.showError(data.message)
-                    this.$emit('api-logout-fail')
-                }
-            }
+        logout: function (silent) {
+            const callback = function (success, result) {
+                if (!success && !silent && result.message)
+                    this.showError(result.message)
+                this.$emit('api-logout', success, result)
+            }.bind(this)
             revoke_token(callback)
         },
         newCourse: function (course) {
             const api = '/api/courses/'
-            this.sendRequest(api, course, 'api-new-course')
+            this.sendRequest(api, { data: course }, 'api-new-course')
         },
         listCourses: function () {
             const api = '/api/courses/'
@@ -262,11 +255,11 @@ export default new Vue({
         },
         updateCourse: function (course) {
             const api = '/api/courses/' + course.id
-            this.sendRequest(api, course, 'api-update-course')
+            this.sendRequest(api, { data: course }, 'api-update-course')
         },
         removeCourse: function (course) {
             const api = '/api/courses/' + course.id
-            this.sendRequest(api, course, 'api-remove-course')
+            this.sendRequest(api, { data: course }, 'api-remove-course')
         },
         listCourseItems: function (course) {
             const api = '/api/courses/' + course.id + '/items/'
@@ -274,7 +267,7 @@ export default new Vue({
         },
         newCoursework: function (coursework) {
             const api = '/api/courseworks/'
-            this.sendRequest(api, coursework, 'api-new-coursework')
+            this.sendRequest(api, { data: coursework }, 'api-new-coursework')
         },
         getCoursework: function (coursework) {
             const api = '/api/courseworks/' + coursework.id
@@ -286,11 +279,11 @@ export default new Vue({
         },
         updateCoursework: function (coursework) {
             const api = '/api/courseworks/' + coursework.id
-            this.sendRequest(api, coursework, 'api-update-coursework')
+            this.sendRequest(api, { data: coursework }, 'api-update-coursework')
         },
         removeCoursework: function (coursework) {
             const api = '/api/courseworks/' + coursework.id
-            this.sendRequest(api, coursework, 'api-remove-coursework')
+            this.sendRequest(api, { data: coursework }, 'api-remove-coursework')
         },
         getCourseworkContent: function (coursework) {
             const api = '/api/courseworks/' + coursework.id + '/content/'
@@ -298,11 +291,11 @@ export default new Vue({
         },
         buildCoursework: function (coursework) {
             const api = '/api/courseworks/' + coursework.id + '/build/'
-            this.sendRequest(api, coursework, 'api-build-coursework')
+            this.sendRequest(api, { data: coursework }, 'api-build-coursework')
         },
         taskCoursework: function (coursework) {
             const api = '/api/courseworks/' + coursework.id + '/task/'
-            this.sendRequest(api, coursework, 'api-task-coursework')
+            this.sendRequest(api, { data: coursework }, 'api-task-coursework')
         },
     }
 })
