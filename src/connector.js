@@ -81,8 +81,8 @@ const request_token = function (url, data, callback) {
         data: data,
         crossOrigin: crossOrigin,
         success: function (result) {
-            set_key(ACCESS_TOKEN_KEY, data['access_token'])
-            set_key(REFRESH_TOKEN_KEY, data['refresh_token'])
+            set_key(ACCESS_TOKEN_KEY, result['access_token'])
+            set_key(REFRESH_TOKEN_KEY, result['refresh_token'])
             callback(true, result)
         },
         error: error_callback.bind(callback)
@@ -134,7 +134,7 @@ const revoke_token = function (callback) {
 }
 
 const request_api = function (api, method, paras, callback, complete) {
-    const url = serverUrl + api.slice(-1) === '/' ? api : (api + '/')
+    const url = serverUrl + api + (api.slice(-1) === '/' ? '' : '/')
     reqwest( {
         url: url,
         method: method,
@@ -185,9 +185,9 @@ export default new Vue({
             const loading = opt.loading
             const silent =  opt.silent
             const method = opt.method ? opt.method :
-                  event.startswith('api-new') ? 'post' :
-                  api.startswith('api-update') ? 'patch' :
-                  api.startswith('api-remove') ? 'delete' : 'get'
+                  event.indexOf('api-new') === 0 ? 'post' :
+                  api.indexOf('api-update') === 0 ? 'patch' :
+                  api.indexOf('api-remove') === 0 ? 'delete' : 'get'
 
             const retry_callback = function (success, result) {
                 if (success)
@@ -202,7 +202,7 @@ export default new Vue({
             const callback = function (success, result) {
                 if (success)
                     this.$emit(event, true, result)
-                else if (result.status === 401 && is_authenticated()) {
+                else if (result.status === 401 && is_authenticated() && 0) {
                     refresh_token(retry_callback)
                 }
                 else {

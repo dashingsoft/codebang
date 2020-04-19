@@ -1,5 +1,5 @@
 <template>
-  <div class="cb-course-manage cb-container">
+  <div class="cb-code-manager cb-container">
     <el-card class="cb-container">
       <div class="cb-titlebar">
         <span>课程管理</span>
@@ -7,13 +7,13 @@
           <el-button
             title="删除当前课程和相关的课程文件"
             type="text"
-            :disabled="courseIndex === -1"
+            :disabled="!currentCourse"
             icon="el-icon-delete"
             @click="handleCourseRemove"></el-button>
           <el-button
             title="修改课程名称"
             type="text"
-            :disabled="courseIndex === -1"
+            :disabled="!currentCourse"
             icon="el-icon-edit"
             @click="handleCourseUpdate"></el-button>
           <el-button
@@ -29,21 +29,24 @@
         </div>
       </div>
       <el-select
+        v-model="courseIndex"
         @change="handleCourseChange"
         class="w-100"
         filterable
         clearable
+        remote
+        :remote-method="remoteMethod"
+        :loading="loadingCourse"
         placeholder="请选择课程">
         <el-option
-          v-for="(item, index) in courses"
+          v-for="(index, item) in matchedCourses"
           :key="item.id"
           :label="item.name"
           :value="index">
         </el-option>
       </el-select>
       <el-table
-        ref="singleTable"
-        :data="courseItems"
+        :data="courseworkData"
         empty-text="没有内容"
         highlight-current-row
         @current-change="handleCourseworkChange">
@@ -74,12 +77,12 @@
           </template>
           <template slot-scope="scope">
             <el-button
-              title="删除文件"
-              type="danger"
+              title="编译和运行"
+              type="primary"
               size="mini"
               plain
-              icon="el-icon-delete"
-              @click="handleCourseworkRemove(scope.row)"></el-button>
+              icon="el-icon-position"
+              @click="handleCourseworkBuild(scope.$index, scope.row)"></el-button>
             <el-dropdown trigger="hover">
               <el-button
                 size="mini"
@@ -89,7 +92,7 @@
             </el-button>
               <el-dropdown-menu slot="dropdown">
                 <el-dropdown-item
-                  @click="handleCourseworkBuild(scope.$index, scope.row)">编译和运行
+                  @click="handleCourseworkRemove(scope.$index, scope.row)">删除
                 </el-dropdown-item>
                 <el-dropdown-item divided>切换折行模式</el-dropdown-item>
                 <el-dropdown-item>切换Tab宽度(4)</el-dropdown-item>
@@ -106,24 +109,26 @@
 import connector from '../connector.js'
 
 export default {
-    name: 'CourseManage',
+    name: 'CodeManager',
     props: {
         courseId: Number,
     },
     computed: {
         currentCourse: function () {
-            return (this.courses && this.courseIndex !== -1 && this.courseIndex < this.courses.length) ? this.courses[this.courseIndex] : null;
+            return this.courseIndex === undefined ? null : this.matchedCourses[this.courseIndex]
         },
         currentCoursework: function () {
-            return (this.courseItems && this.itemIndex !== -1 && this.itemIndex < this.courseItems.length) ? this.courseItems[this.itemIndex] : null;
+            return this.courseIndex === undefined ? null : this.courseData[this.courseIndex]
         },
     },
     data() {
         return {
-            courseIndex: -1,
-            itemIndex: -1,
-            courses: [],
-            courseItems: [],
+            courseIndex: undefined,
+            courseworkIndex: undefined,
+            courseData: undefined,
+            matchedCourses: [],
+            courseworkData: [],
+            loadingCourse: false,
         }
     },
     mounted() {
@@ -131,6 +136,24 @@ export default {
         connector.$on('api-logout', this.onLogout)
     },
     methods: {
+        remoteMethod(query) {
+            if (this.courseData === undefined) {
+                this.loadingCourse = true
+                this.queryCourses()
+            }
+            else {
+                this.loadingCourse = false
+                if (query === '') {
+                    this.matchedCourses = this.courseData
+                }
+                else {
+                    this.matchedCourses = this.courseData.filter( item => {
+                        return item.title.indexOf(query) > -1
+                    } )
+                }
+            }
+         },
+
         queryCourses() {
             connector.$once('api-list-courses', this.onListCourses)
             connector.listCourses()
@@ -140,10 +163,11 @@ export default {
             connector.listCourseItems(course)
         },
         clearData() {
-            this.courseIndex = -1
-            this.itemIndex = -1
-            this.courses = []
-            this.courseItems = []
+            this.courseIndex = undefined
+            this.courseworkIndex = undefined
+            this.courseData = undefined
+            this.matchedCourses = []
+            this.courseworkData = []
         },
         refreshData() {
             this.clearData()
@@ -151,33 +175,38 @@ export default {
         },
 
         onLogin: function (success) {
-            if (success) this.refreshData()
+            if (success)
+                this.refreshData()
         },
         onLogout: function (success) {
-            if (success) this.clearData()
+            if (success)
+                this.clearData()
         },
         onListCourses: function (success, data) {
-            if (success) this.courses = data
+            this.loadingCourse = false
+            if (success)
+                this.courseData = data
         },
         onListCourseItems: function (success, data) {
-            if (success) this.courseItems = data
+            if (success)
+                this.courseworkData = data
         },
         onCourseCreated: function (success, data) {
             if (!success)
                 return
-            
-            this.courses.append(data)
-            this.courseIndex = this.courses.length - 1
+
+            this.courseData.append(data)
+            this.courseIndex = this.courseData.length - 1
         },
         onRemoveCourse: function (success) {
             if (!success)
                 return
-            
+
             let course = this.currentCourse
             if (!course)
                 return
         },
-        
+
         handleCourseAdd: function () {
             this.$prompt('请输入课程名称', '创建课程', {
                 inputValue: 'hello-world.c',
@@ -217,10 +246,14 @@ export default {
             if (this.currentCourse) {
                 this.queryCourseItems(this.currentCourse)
             }
-            else
-                this.courseItems = []
+            else {
+                this.courseworkIndex = undefined
+                this.courseworkData = []
+            }
         },
-        
+
+        handleCourseworkChange: function () {
+        },
         handleCourseworkAdd: function () {
         },
         handleCourseworkSave: function (coursework) {
@@ -246,69 +279,69 @@ export default {
 <style>
 
 /* Color themem */
-.cb-course-manage .el-card,
-.cb-course-manage .el-card .el-input__inner,
-.cb-course-manage .el-card .el-table,
-.cb-course-manage .el-card .el-table * {
+.cb-code-manager .el-card,
+.cb-code-manager .el-card .el-input__inner,
+.cb-code-manager .el-card .el-table,
+.cb-code-manager .el-card .el-table * {
     background-color: inherit;
     color: inherit;
 }
 
-.cb-course-manage .el-card .el-table .el-table__body tr.current-row.hover-row td,
-.cb-course-manage .el-card .el-table .el-table__body tr:hover {
+.cb-code-manager .el-card .el-table .el-table__body tr.current-row.hover-row td,
+.cb-code-manager .el-card .el-table .el-table__body tr:hover {
     background-color: #3f3f3f;
 }
 
-.cb-course-manage .el-card .el-table .el-table__body tr.current-row {
+.cb-code-manager .el-card .el-table .el-table__body tr.current-row {
     background-color: #454545;
 }
 
-.cb-course-manage .el-card,
-.cb-course-manage .el-card .el-input__inner {
+.cb-code-manager .el-card,
+.cb-code-manager .el-card .el-input__inner {
     border: 1px solid #666;
 }
 
-.cb-course-manage .el-card .el-table td,
-.cb-course-manage .el-card .el-table th.is-leaf {
+.cb-code-manager .el-card .el-table td,
+.cb-code-manager .el-card .el-table th.is-leaf {
     border-bottom: 1px solid #666;
 }
 
-.cb-course-manage .el-card .el-table .el-table__body tr > td:first-child {
+.cb-code-manager .el-card .el-table .el-table__body tr > td:first-child {
     border-left: 1px solid #666;
 }
-.cb-course-manage .el-card .el-table .el-table__body tr > td:last-child {
+.cb-code-manager .el-card .el-table .el-table__body tr > td:last-child {
     border-right: 1px solid #666;
 }
 
-.cb-course-manage .el-card .el-table::before,
-.cb-course-manage .el-card .el-table .el-table__fixed-right::before {
+.cb-code-manager .el-card .el-table::before,
+.cb-code-manager .el-card .el-table .el-table__fixed-right::before {
     background-color: #666;
 }
 
-.cb-course-manage .el-card__body .el-table .el-button {
+.cb-code-manager .el-card__body .el-table .el-button {
     border: 0;
 }
 
 /* Padding and margin */
-.cb-course-manage .el-card__body {
+.cb-code-manager .el-card__body {
     padding: 9px 16px;
 }
 
-.cb-course-manage .el-card__body > * {
+.cb-code-manager .el-card__body > * {
     margin-bottom: 9px;
 }
 
-.cb-course-manage .el-card__body .el-table td {
+.cb-code-manager .el-card__body .el-table td {
     padding: 6px 0;
     cursor: pointer;
 }
 
-.cb-course-manage .el-card__body .el-button {
+.cb-code-manager .el-card__body .el-button {
     padding: 2px 6px;
     margin-left: 6px;
 }
 
-.cb-course-manage .el-card__body .el-table .is-right > .cell {
+.cb-code-manager .el-card__body .el-table .is-right > .cell {
     padding: 0 6px;
 }
 

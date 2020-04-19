@@ -24,10 +24,10 @@
           @click="activePage=2"
           type="text">运行</el-button>
         <div class="cb-title">
-          {{ title }}
+          {{ displayTitle }}
           <el-button
             title="修改文件名称"
-            v-show="!!title"
+            v-show="displayTitle"
             icon="el-icon-edit"
             size="small"
             type="text"></el-button>
@@ -68,7 +68,7 @@
       <div class="cb-main">
         <el-container class="cb-container" v-show="!activePage">
           <el-aside style="padding: 2px">
-            <cb-course-manage></cb-course-manage>
+            <cb-code-manager></cb-code-manager>
           </el-aside>
           <el-main style="padding: 0 2px 2px 2px;">
             <div id="editor" class="cb-editor"></div>
@@ -94,7 +94,7 @@ import connector from './connector.js'
 export default {
     name: 'app',
     computed: {
-        title: function () {
+        displayTitle: function () {
             return this.activeBuffer ? this.activeBuffer.filename : ''
         }
     },
