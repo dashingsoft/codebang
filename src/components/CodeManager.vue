@@ -57,12 +57,18 @@
               property="name"
               sortable
               label="课程文件">
+              <template v-slot="scope">
+                <span
+                  v-bind:class="{ 'cb-red-dot': courseworkData[scope.$index].dirty }">
+                  {{ scope.row.name }}
+                </span>
+              </template>
             </el-table-column>
             <el-table-column
               fixed="right"
               align="right"
               width="80">
-              <template slot="header">
+              <template v-slot:header>
                 <el-button
                   title="新增文件"
                   type="primary"
@@ -78,14 +84,14 @@
                   icon="el-icon-document-copy"
                   @click="handleCourseworkSave"></el-button>
               </template>
-              <template slot-scope="scope">
+              <template v-slot:default="scope">
                 <el-button
                   title="编译和运行"
                   type="primary"
                   size="mini"
                   plain
                   icon="el-icon-position"
-                  @click="handleCourseworkBuild(scope.$index)"></el-button>
+                  @click="handleCourseworkBuild(scope.row)"></el-button>
                 <el-dropdown trigger="hover">
                   <el-button
                     size="mini"
@@ -95,7 +101,7 @@
                   </el-button>
                   <el-dropdown-menu slot="dropdown">
                     <el-dropdown-item
-                      @click="handleCourseworkRemove(scope.$index)">删除
+                      @click="handleCourseworkRemove(scope.row)">删除
                     </el-dropdown-item>
                     <el-dropdown-item divided>切换折行模式</el-dropdown-item>
                     <el-dropdown-item>切换Tab宽度(4)</el-dropdown-item>
@@ -134,12 +140,17 @@ export default {
             currentCoursework: undefined,
             courseworkData: [],
             loadingCourse: false,
+            dirtyFlag: false,
         }
     },
     mounted() {
         connector.$on('api-login', this.onLogin)
         connector.$on('api-logout', this.onLogout)
         this.$on('coder-select-file', this.$refs.editor.onBufferSelected)
+        // this.$watch( this.dirtyFlag, value => {
+        //     if (value)
+        //         this.setSaveFlags()
+        // } )
     },
     methods: {
         clearData() {
@@ -186,8 +197,10 @@ export default {
             }
         },
         onListCourseItems: function (success, data) {
-            if (success)
+            if (success) {
+                data.forEach( item => item.dirty = false )
                 this.courseworkData = data
+            }
         },
         onCourseCreated: function (success, data) {
             if (success) {

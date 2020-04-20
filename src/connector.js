@@ -182,7 +182,7 @@ export default new Vue({
     methods: {
         showError(err) {
             Vue.prototype.$message( {
-                type: 'error',
+                type: 'warning',
                 message: err,
                 showClose: true,
                 duration: 15000

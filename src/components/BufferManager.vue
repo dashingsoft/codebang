@@ -20,8 +20,9 @@ export default {
     data() {
         return {
             editor: null,
+            scratch: null,
             bufferIndex: undefined,
-            buffers: [],
+            bufferList: [],
             mode: 'ace/mode/c_cpp',
             theme: 'ace/theme/twilight',
             fontSize: 18,
@@ -40,10 +41,20 @@ export default {
             autoScrollEditorIntoView: true,
             displayIndentGuides: false
         });
-        // editor.renderer.setScrollMargin(10, 10, 10, 10);
-        this.editor.getSession().setUseWrapMode(this.wrapMode);
-        this.editor.getSession().setTabSize(this.tabSize);
+        // this.editor.renderer.setScrollMargin(10, 10, 10, 10);
+        this.scratch = this.editor.getSession()
+        this.scratch.setUseWrapMode(this.wrapMode);
+        this.scratch.setTabSize(this.tabSize);
         this.editor.focus();
+    },
+    computed: {
+        buffer: function (coursework) {
+            if (coursework && coursework.id)
+                for (let i = 0; i < this.bufferList.length; i ++)
+                    if (this.bufferList[i].coursework.id === coursework.id)
+                        return this.bufferList[i]
+            return undefined
+        },
     },
     methods: {
         resizeEditor() {
@@ -55,16 +66,24 @@ export default {
             connector.updateCoursework()
         },
         selectBuffer(index) {
-            if (this.bufferIndex !== index) {
+            if (index === undefined || index === -1 || index >= this.bufferList.length) {
+                this.bufferIndex = undefined
+                this.editor.setSession(this.scratch)
+            }
+            else if (this.bufferIndex !== index) {
                 this.bufferIndex = index
-                this.editor.setSession( this.buffers[index].buffer )
+                this.editor.setSession( this.bufferList[index].buffer )
             }
         },
 
         onBufferSelected: function (coursework) {
-            let index;
-            for (index = 0; index < this.buffers.length; index ++)
-                if (this.buffers[index].coursework.id === coursework.id) {
+            if (!coursework) {
+                this.selectBuffer()
+                return
+            }
+
+            for (let index = 0; index < this.bufferList.length; index ++)
+                if (this.bufferList[index].coursework.id === coursework.id) {
                     this.selectBuffer(index)
                     return
                 }
@@ -72,11 +91,13 @@ export default {
             connector.$once('api-get-coursework-content', ( success, data ) => {
                 if ( success ) {
                     let buf = new ace.EditSession( data )
-                    this.buffers.push( {
+                    buf.setMode(this.mode)
+                    buf.on('change', () => coursework.dirty = true )
+                    this.bufferList.push( {
                         coursework: coursework,
                         buffer: buf
                     } )
-                    this.selectBuffer( this.buffers.length - 1 )
+                    this.selectBuffer( this.bufferList.length - 1 )
                 }
             } )
             connector.getCourseworkContent(coursework)
