@@ -153,6 +153,17 @@ const request_api = function (api, method, paras, callback, complete) {
     } )
 }
 
+const make_multipart_data = function (filename, content) {
+    const boundary = '---------------------------' + Date.now().toString(16)
+    const prefix = '--' + boundary + '\r\n' + 'Content-Disposition: multipart/form-data; '
+    const paras = ['']
+    paras.push('name="source"; filename="' + filename + '"\r\n\r\n' + content + '\r\n\r\n')
+    return {
+        data: paras.join(prefix) + '--' + boundary + '--\r\n',
+        contentType: 'multipart/form-data; boundary=' + boundary
+    }
+}
+
 // const upload_file = function (api, data, callback) {
 //     let file = new File( [filedata], filename, { type: 'text/plain' } )
 //     paras.data = { source: file }
@@ -186,8 +197,8 @@ export default new Vue({
             const silent =  opt.silent
             const method = opt.method ? opt.method :
                   event.indexOf('api-new') === 0 ? 'post' :
-                  api.indexOf('api-update') === 0 ? 'patch' :
-                  api.indexOf('api-remove') === 0 ? 'delete' : 'get'
+                  event.indexOf('api-update') === 0 ? 'patch' :
+                  event.indexOf('api-remove') === 0 ? 'delete' : 'get'
 
             const retry_callback = function (success, result) {
                 if (success)
@@ -242,7 +253,7 @@ export default new Vue({
             revoke_token(callback)
         },
         getLogon: function () {
-            const api = '/users/info/'
+            const api = '/api/users/info/'
             this.sendRequest(api, {}, 'api-get-logon', {silent: true})
         },
         newCourse: function (course) {
@@ -269,9 +280,9 @@ export default new Vue({
             const api = '/api/courses/' + course.id + '/items/'
             this.sendRequest(api, {}, 'api-list-course-items')
         },
-        newCoursework: function (coursework) {
+        newCoursework: function (filename, content) {
             const api = '/api/courseworks/'
-            this.sendRequest(api, { data: coursework }, 'api-new-coursework')
+            this.sendRequest(api, make_multipart_data(filename, content), 'api-new-coursework')
         },
         getCoursework: function (coursework) {
             const api = '/api/courseworks/' + coursework.id
