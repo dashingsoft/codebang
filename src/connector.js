@@ -146,35 +146,32 @@ const request_api = function (api, method, paras, callback, complete) {
         data: paras.data,
         crossOrigin: crossOrigin,
         success: function (result) {
-            callback(true, result)
+            callback(true, (result && Boolean(result.responseText)) ? result.responseText : result)
         },
         error: error_callback.bind(callback),
         complete: complete
     } )
 }
 
-const make_multipart_data = function (filename, content) {
+const make_multipart_data = function (args, files) {
     const boundary = '---------------------------' + Date.now().toString(16)
     const prefix = '--' + boundary + '\r\n' + 'Content-Disposition: multipart/form-data; '
-    const paras = ['']
-    paras.push('name="source"; filename="' + filename + '"\r\n\r\n' + content + '\r\n\r\n')
+    const result = ['']
+
+    if (args)
+        args.forEach( function (k) {
+            result.push('name="' + k[0] + '"\r\n\r\n' + k[1] + '\r\n')
+        } )
+    if (files)
+        files.forEach( function (k) {
+            result.push('name="' + k[0] + '"; filename="' + k[1] + '"\r\n\r\n' + k[2] + '\r\n')
+        } )
+
     return {
-        data: paras.join(prefix) + '--' + boundary + '--\r\n',
+        data: result.join(prefix) + '--' + boundary + '--\r\n',
         contentType: 'multipart/form-data; boundary=' + boundary
     }
 }
-
-// const upload_file = function (api, data, callback) {
-//     let file = new File( [filedata], filename, { type: 'text/plain' } )
-//     paras.data = { source: file }
-//     paras.contentType = 'multipart/form-data'
-//     reqwest( paras );
-// }
-
-// const download_file = function (api, callback) {
-//     paras.data = coursework
-//     paras.responseType = 'blob'
-// }
 
 export default new Vue({
     computed: {
@@ -198,6 +195,7 @@ export default new Vue({
             const method = opt.method ? opt.method :
                   event.indexOf('api-new') === 0 ? 'post' :
                   event.indexOf('api-update') === 0 ? 'patch' :
+                  event.indexOf('api-edit') === 0 ? 'put' :
                   event.indexOf('api-remove') === 0 ? 'delete' : 'get'
 
             const retry_callback = function (success, result) {
@@ -280,9 +278,14 @@ export default new Vue({
             const api = '/api/courses/' + course.id + '/items/'
             this.sendRequest(api, {}, 'api-list-course-items')
         },
-        newCoursework: function (filename, content) {
+        newCoursework: function (filename, content, course) {
             const api = '/api/courseworks/'
-            this.sendRequest(api, make_multipart_data(filename, content), 'api-new-coursework')
+            let files = []
+            files.push(['source', filename, content])
+            let args = []
+            if (course)
+                args.push(['course', course.id])
+            this.sendRequest(api, make_multipart_data(args, files), 'api-new-coursework')
         },
         getCoursework: function (coursework) {
             const api = '/api/courseworks/' + coursework.id
@@ -302,7 +305,7 @@ export default new Vue({
         },
         getCourseworkContent: function (coursework) {
             const api = '/api/courseworks/' + coursework.id + '/content/'
-            this.sendRequest(api, {}, 'api-get-coursework')
+            this.sendRequest(api, { responseType: 'blob' }, 'api-get-coursework-content')
         },
         buildCoursework: function (coursework) {
             const api = '/api/courseworks/' + coursework.id + '/build/'

@@ -25,6 +25,8 @@ export default {
             mode: 'ace/mode/c_cpp',
             theme: 'ace/theme/twilight',
             fontSize: 18,
+            tabSize: 4,
+            wrapMode: true,
         }
     },
     mounted() {
@@ -39,8 +41,8 @@ export default {
             displayIndentGuides: false
         });
         // editor.renderer.setScrollMargin(10, 10, 10, 10);
-        this.editor.getSession().setUseWrapMode(true);
-        this.editor.getSession().setTabSize(4);
+        this.editor.getSession().setUseWrapMode(this.wrapMode);
+        this.editor.getSession().setTabSize(this.tabSize);
         this.editor.focus();
     },
     methods: {
@@ -52,8 +54,35 @@ export default {
         saveBuffer() {
             connector.updateCoursework()
         },
+        selectBuffer(index) {
+            if (this.bufferIndex !== index) {
+                this.bufferIndex = index
+                this.editor.setSession( this.buffers[index].buffer )
+            }
+        },
 
-        onFileSelected: function () {
+        onBufferSelected: function (coursework) {
+            let index;
+            for (index = 0; index < this.buffers.length; index ++)
+                if (this.buffers[index].coursework.id === coursework.id) {
+                    this.selectBuffer(index)
+                    return
+                }
+
+            connector.$once('api-get-coursework-content', ( success, data ) => {
+                if ( success ) {
+                    let buf = new ace.EditSession( data )
+                    this.buffers.push( {
+                        coursework: coursework,
+                        buffer: buf
+                    } )
+                    this.selectBuffer( this.buffers.length - 1 )
+                }
+            } )
+            connector.getCourseworkContent(coursework)
+        },
+
+        onLocalFileSelected: function () {
             var file = this.$el.querySelector('input[type="file"]').files[0]
             var reader = new FileReader()
             reader.onload = (evt) => {

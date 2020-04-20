@@ -139,6 +139,7 @@ export default {
     mounted() {
         connector.$on('api-login', this.onLogin)
         connector.$on('api-logout', this.onLogout)
+        this.$on('coder-select-file', this.$refs.editor.onBufferSelected)
     },
     methods: {
         clearData() {
@@ -290,7 +291,7 @@ export default {
 
         handleCourseworkChange: function (coursework) {
             this.currentCoursework = coursework
-            this.$emit('coder-open-file', coursework)
+            this.$emit('coder-select-file', coursework)
         },
         handleCourseworkAdd: function () {
             this.$prompt('请输入文件名称', '创建代码文件', {
@@ -300,21 +301,23 @@ export default {
                 callback: (action, instance) => {
                     if (action === 'confirm') {
                         connector.$once('api-new-coursework', this.onCourseworkCreated)
-                        connector.newCoursework(instance.inputValue, '/* foo.c */')
+                        let name = instance.inputValue
+                        let content = '/* CodeBang Course: ' + name + '*/'
+                        connector.newCoursework(name, content, this.currentCourse)
                     }
                 }
             })
         },
         handleCourseworkSave: function () {
             if (this.currentCoursework) {
-                connector.$once('api-update-coursework', this.onUpdateCoursewrok)
+                connector.$once('api-save-coursework', this.onUpdateCoursewrok)
                 connector.updateCoursework(this.currentCoursework)
                 this.$emit('coder-save-file', this.currentCoursework)
             }
         },
         handleCourseworkRename: function () {
             if (this.currentCoursework) {
-                connector.$once('api-update-coursework', this.onUpdateCoursewrok)
+                connector.$once('api-update-coursework-name', this.onUpdateCoursewrok)
                 connector.updateCoursework(this.currentCoursework)
                 this.$emit('coder-rename-file', this.currentCoursework)
             }
