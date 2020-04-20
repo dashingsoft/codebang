@@ -1,11 +1,17 @@
 import Vue from 'vue'
 import App from './App.vue'
 import CodeManager from './components/CodeManager.vue'
+import BufferManager from './components/BufferManager.vue'
+import BuildManager from './components/BufferManager.vue'
+import LaunchManager from './components/LaunchManager.vue'
 
 import './plugins/element.js'
 
 Vue.config.productionTip = false
 Vue.component('cb-code-manager', CodeManager)
+Vue.component('cb-buffer-manager', BufferManager)
+Vue.component('cb-build-manager', BuildManager)
+Vue.component('cb-lanuch-manager', LaunchManager)
 
 new Vue({
   render: h => h(App),

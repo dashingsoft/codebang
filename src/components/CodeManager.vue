@@ -1,108 +1,116 @@
 <template>
-  <div class="cb-code-manager cb-container">
-    <el-card class="cb-container">
-      <div class="cb-titlebar">
-        <span>课程管理</span>
-        <div class="cb-toolbox">
-          <el-button
-            title="删除当前课程和相关的课程文件"
-            type="text"
-            :disabled="!currentCourse"
-            icon="el-icon-delete"
-            @click="handleCourseRemove"></el-button>
-          <el-button
-            title="修改课程名称"
-            type="text"
-            :disabled="!currentCourse"
-            icon="el-icon-edit"
-            @click="handleCourseUpdate"></el-button>
-          <el-button
-            title="刷新"
-            type="text"
-            icon="el-icon-refresh-right"
-            @click="handleCourseRefresh"></el-button>
-          <el-button
-            title="新增课程"
-            type="text"
-            icon="el-icon-document-add"
-            @click="handleCourseAdd"></el-button>
-        </div>
-      </div>
-      <el-select
-        v-model="courseIndex"
-        @change="handleCourseChange"
-        class="w-100"
-        filterable
-        clearable
-        remote
-        :remote-method="onSearchCourse"
-        :loading="loadingCourse"
-        placeholder="请选择课程">
-        <el-option
-          v-for="(item, index) in matchedCourses"
-          :key="item.id"
-          :label="item.title"
-          :value="index">
-        </el-option>
-      </el-select>
-      <el-table
-        :data="courseworkData"
-        empty-text="没有内容"
-        highlight-current-row
-        @current-change="handleCourseworkChange">
-        <el-table-column
-          property="name"
-          sortable
-          label="课程文件">
-        </el-table-column>
-        <el-table-column
-          fixed="right"
-          align="right"
-          width="80">
-          <template slot="header" slot-scope="scope">
-            <el-button
-              title="新增文件"
-              type="primary"
-              plain
-              size="mini"
-              icon="el-icon-plus"
-              @click="handleCourseworkAdd"></el-button>
-            <el-button
-              title="保存文件"
-              type="primary"
-              plain
-              size="mini"
-              icon="el-icon-document-copy"
-              @click="handleCourseworkSave(scope.$index)"></el-button>
-          </template>
-          <template slot-scope="scope">
-            <el-button
-              title="编译和运行"
-              type="primary"
-              size="mini"
-              plain
-              icon="el-icon-position"
-              @click="handleCourseworkBuild(scope.$index)"></el-button>
-            <el-dropdown trigger="hover">
+  <el-container class="cb-container">
+    <el-aside style="padding: 2px">
+      <div class="cb-code-manager cb-container">
+        <el-card class="cb-container">
+          <div class="cb-navbar">
+            <span>课程管理</span>
+            <div class="cb-toolbox">
               <el-button
-                size="mini"
-                type="primary"
-                plain
-                class="el-icon-more">
-            </el-button>
-              <el-dropdown-menu slot="dropdown">
-                <el-dropdown-item
-                  @click="handleCourseworkRemove(scope.$index)">删除
-                </el-dropdown-item>
-                <el-dropdown-item divided>切换折行模式</el-dropdown-item>
-                <el-dropdown-item>切换Tab宽度(4)</el-dropdown-item>
-              </el-dropdown-menu>
-            </el-dropdown>
-          </template>
-        </el-table-column>
-      </el-table>
-    </el-card>
-  </div>
+                title="删除当前课程和相关的课程文件"
+                type="text"
+                :disabled="!currentCourse"
+                icon="el-icon-delete"
+                @click="handleCourseRemove"></el-button>
+              <el-button
+                title="修改课程名称"
+                type="text"
+                :disabled="!currentCourse"
+                icon="el-icon-edit"
+                @click="handleCourseUpdate"></el-button>
+              <el-button
+                title="刷新"
+                type="text"
+                icon="el-icon-refresh-right"
+                @click="handleCourseRefresh"></el-button>
+              <el-button
+                title="新增课程"
+                type="text"
+                icon="el-icon-document-add"
+                @click="handleCourseAdd"></el-button>
+            </div>
+          </div>
+          <el-select
+            ref="course"
+            v-model="courseIndex"
+            @change="handleCourseChange"
+            class="w-100"
+            filterable
+            clearable
+            remote
+            :remote-method="onFilterCourse"
+            :loading="loadingCourse"
+            placeholder="请选择课程">
+            <el-option
+              v-for="(item, index) in matchedCourses"
+              :key="item.id"
+              :label="item.title"
+              :value="index">
+            </el-option>
+          </el-select>
+          <el-table
+            :data="courseworkData"
+            empty-text="没有内容"
+            highlight-current-row
+            @current-change="handleCourseworkChange">
+            <el-table-column
+              property="name"
+              sortable
+              label="课程文件">
+            </el-table-column>
+            <el-table-column
+              fixed="right"
+              align="right"
+              width="80">
+              <template slot="header">
+                <el-button
+                  title="新增文件"
+                  type="primary"
+                  plain
+                  size="mini"
+                  icon="el-icon-plus"
+                  @click="handleCourseworkAdd"></el-button>
+                <el-button
+                  title="保存文件"
+                  type="primary"
+                  plain
+                  size="mini"
+                  icon="el-icon-document-copy"
+                  @click="handleCourseworkSave"></el-button>
+              </template>
+              <template slot-scope="scope">
+                <el-button
+                  title="编译和运行"
+                  type="primary"
+                  size="mini"
+                  plain
+                  icon="el-icon-position"
+                  @click="handleCourseworkBuild(scope.$index)"></el-button>
+                <el-dropdown trigger="hover">
+                  <el-button
+                    size="mini"
+                    type="primary"
+                    plain
+                    class="el-icon-more">
+                  </el-button>
+                  <el-dropdown-menu slot="dropdown">
+                    <el-dropdown-item
+                      @click="handleCourseworkRemove(scope.$index)">删除
+                    </el-dropdown-item>
+                    <el-dropdown-item divided>切换折行模式</el-dropdown-item>
+                    <el-dropdown-item>切换Tab宽度(4)</el-dropdown-item>
+                  </el-dropdown-menu>
+                </el-dropdown>
+              </template>
+            </el-table-column>
+          </el-table>
+        </el-card>
+      </div>
+    </el-aside>
+    <el-main style="padding: 2px;">
+      <cb-buffer-manager ref="editor"></cb-buffer-manager>
+    </el-main>
+  </el-container>
 </template>
 
 <script>
@@ -117,16 +125,13 @@ export default {
         currentCourse: function () {
             return this.courseIndex === undefined ? null : this.matchedCourses[this.courseIndex]
         },
-        currentCoursework: function () {
-            return this.courseIndex === undefined ? null : this.courseData[this.courseIndex]
-        },
     },
     data() {
         return {
             courseIndex: undefined,
-            courseworkIndex: undefined,
             courseData: undefined,
             matchedCourses: [],
+            currentCoursework: undefined,
             courseworkData: [],
             loadingCourse: false,
         }
@@ -138,9 +143,9 @@ export default {
     methods: {
         clearData() {
             this.courseIndex = undefined
-            this.courseworkIndex = undefined
             this.courseData = undefined
             this.matchedCourses = []
+            this.currentCoursework = null
             this.courseworkData = []
             this.loadingCourse = false
         },
@@ -157,13 +162,8 @@ export default {
             connector.listCourseItems(course)
         },
 
-        onSearchCourse: function (query) {
-            if (this.courseData === undefined) {
-                this.loadingCourse = true
-                this.queryCourses()
-            }
-            else {
-                this.loadingCourse = false
+        onFilterCourse: function (query) {
+            if (this.courseData) {
                 this.matchedCourses = this.courseData.filter( item => {
                     return item.title.indexOf(query) > -1
                 } )
@@ -181,7 +181,7 @@ export default {
             this.loadingCourse = false
             if (success) {
                 this.courseData = data
-                this.matchedCourses = data
+                this.matchedCourses = data.filter( () => true )
             }
         },
         onListCourseItems: function (success, data) {
@@ -193,91 +193,147 @@ export default {
                 this.courseData.push(data)
                 this.matchedCourses.push(data)
                 this.courseIndex = this.matchedCourses.length - 1
+                this.handleCourseChange()
             }
         },
         onCourseRemoved: function (success) {
             if (success && this.currentCourse) {
-                this.courseworkIndex = undefined
-                this.courseworkData = []
+                let index = this.courseData.indexOf(this.currentCourse)
+                this.courseData.splice(index, 1)
+                this.matchedCourses.splice(this.courseIndex, 1)
+                if (this.matchedCourses.length) {
+                    if (this.courseIndex >= this.matchedCourses.length)
+                        this.courseIndex --
+                    else
+                        this.handleCourseChange()
+                }
+                else {
+                    this.courseIndex = undefined
+                    this.currentCoursework = undefined
+                    this.courseworkData = []
+                }
+            }
+        },
+        onCourseUpdated: function (success, data) {
+            if (success && this.currentCourse) {
+                this.currentCourse.title = data.title
+                this.$refs.course.$el.querySelector('input.el-input__inner').value = data.title
             }
         },
 
         handleCourseAdd: function () {
             this.$prompt('请输入课程名称', '创建课程', {
-                inputValue: 'foo.c',
+                inputValue: '第一节课',
                 confirmButtonText: '确定',
                 cancelButtonText: '取消',
-            }).then(({ value }) => {
-                let data = {
-                    'title': value
+                callback: (action, instance) => {
+                    if (action === 'confirm') {
+                        connector.$once('api-new-course', this.onCourseCreated)
+                        connector.newCourse({ title: instance.inputValue })
+                    }
                 }
-                connector.$once('api-new-course', this.onCourseCreated)
-                connector.newCourse(data)
             })
         },
         handleCourseUpdate: function () {
             if (this.currentCourse) {
-                connector.$once('api-update-course', this.onCourseUpdated)
-                connector.updateCourse(this.currentCourse)
+                this.$prompt('请输入课程的新名称', '修改课程', {
+                    inputValue: this.currentCourse.title,
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    callback: (action, instance) => {
+                        if (action === 'confirm') {
+                            connector.$once('api-update-course', this.onCourseUpdated)
+                            connector.updateCourse({
+                                id: this.currentCourse.id,
+                                title: instance.inputValue
+                            })
+                        }
+                    }
+                })
             }
         },
         handleCourseRemove: function () {
-            let course = this.currentCourse
-            if (course) {
-                this.$confirm('确认删除课程: ' + course.title + '?', '确认', {
+            if (this.currentCourse) {
+                this.$confirm('确认删除课程: ' + this.currentCourse.title + '?', '确认', {
                     confirmButtonText: '确定',
                     cancelButtonText: '取消',
-                    type: 'warning'
-                }).then(() => {
-                    connector.$once('api-remove-course', this.onCourseRemoved)
-                    connector.removeCourse(course)
+                    type: 'warning',
+                    callback: (action) => {
+                        if (action === 'confirm') {
+                            connector.$once('api-remove-course', this.onCourseRemoved)
+                            connector.removeCourse(this.currentCourse)
+                        }
+                    }
                 })
             }
         },
         handleCourseRefresh: function () {
             this.refreshData()
+            this.$refs.course.focus()
         },
         handleCourseChange: function () {
             if (this.currentCourse) {
                 this.queryCourseItems(this.currentCourse)
             }
             else {
-                this.courseworkIndex = undefined
+                this.currentCoursework = undefined
                 this.courseworkData = []
             }
         },
 
-        handleCourseworkChange: function (index) {
-            this.courseworkIndex = index
+        onCourseworkCreated: function (success, data) {
+            if (success) {
+                this.courseworkData.push(data)
+                this.$emit('coder-new-file', data)
+            }
+        },
+
+        handleCourseworkChange: function (coursework) {
+            this.currentCoursework = coursework
+            this.$emit('coder-open-file', coursework)
         },
         handleCourseworkAdd: function () {
+            this.$prompt('请输入文件名称', '创建代码文件', {
+                inputValue: 'foo.c',
+                confirmButtonText: '确定',
+                cancelButtonText: '取消',
+                callback: (action, instance) => {
+                    if (action === 'confirm') {
+                        connector.$once('api-new-coursework', this.onCourseworkCreated)
+                        connector.newCoursework(instance.inputValue, '/* foo.c */')
+                    }
+                }
+            })
         },
         handleCourseworkSave: function () {
-            const coursework = this.courseworkIndex
-            connector.$once('api-update-coursework', this.onUpdateCoursewrok)
-            connector.updateCoursework(coursework)
+            if (this.currentCoursework) {
+                connector.$once('api-update-coursework', this.onUpdateCoursewrok)
+                connector.updateCoursework(this.currentCoursework)
+                this.$emit('coder-save-file', this.currentCoursework)
+            }
         },
-        handleCourseworkUpdate: function (index) {
-            const coursework = this.courseworkData[index]
-            connector.$once('api-update-coursework', this.onUpdateCoursewrok)
-            connector.updateCoursework(coursework)
+        handleCourseworkRename: function () {
+            if (this.currentCoursework) {
+                connector.$once('api-update-coursework', this.onUpdateCoursewrok)
+                connector.updateCoursework(this.currentCoursework)
+                this.$emit('coder-rename-file', this.currentCoursework)
+            }
         },
-        handleCourseworkRemove: function (index) {
-            const coursework = this.courseworkData[index]
+        handleCourseworkRemove: function (coursework) {
             connector.$once('api-remove-coursework', this.onRemoveCoursewrok)
             connector.removeCoursework(coursework)
+            this.$emit('coder-remove-file', coursework)
         },
-        handleCourseworkBuild: function (index) {
-            const coursework = this.courseworkData[index]
+        handleCourseworkBuild: function (coursework) {
             connector.$once('api-build-coursework', this.onBuildCoursewrok)
             connector.buildCoursework(coursework)
+            this.$emit('coder-build-file', coursework)
         },
     }
 }
 </script>
 
 <style>
-
 /* Color themem */
 .cb-code-manager .el-card,
 .cb-code-manager .el-card .el-input__inner,
@@ -344,9 +400,4 @@ export default {
 .cb-code-manager .el-card__body .el-table .is-right > .cell {
     padding: 0 6px;
 }
-
-.w-100 {
-    width: 100%;
-}
-
 </style>
