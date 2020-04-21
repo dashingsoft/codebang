@@ -25,12 +25,6 @@
           type="text">运行</el-button>
         <div class="cb-title">
           {{ title }}
-          <el-button
-            title="修改文件名称"
-            v-show="title"
-            icon="el-icon-edit"
-            size="small"
-            type="text"></el-button>
         </div>
         <div class="cb-toolbox">
           <el-button
@@ -55,7 +49,9 @@
       </el-header>
       <div class="cb-main">
         <div class="cb-container" v-show="activePage==0">
-          <cb-code-manager ref="coder"></cb-code-manager>
+          <cb-code-manager
+            v-on:title-changed="resetTitle"
+            ref="coder"></cb-code-manager>
         </div>
         <div class="cb-container" v-show="activePage==1">
           <!-- <cb-builder></cb-builder> -->
@@ -101,11 +97,8 @@ export default {
             connector.getLogon()
     },
     methods: {
-        resetTitle() {
-            let coder = this.$refs && this.$refs.coder
-            this.title = ! coder ? '' :
-                ( coder.currentCourse ? coder.currentCourse.title + ' - ' : '' ) +
-                + ( coder.currentCoursework ? coder.currentCoursework.name : '' )
+        resetTitle( title ) {
+            this.title = title
         },
 
         handleUserMenu: function (command) {

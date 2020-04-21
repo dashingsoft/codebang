@@ -1,5 +1,6 @@
 <template>
   <el-container class="cb-container">
+    <input type="file" accept=".c,.h" style="display:none" @change="onFileSelected">
     <el-aside style="padding: 2px">
       <div class="cb-code-manager cb-container">
         <el-card class="cb-container">
@@ -17,7 +18,7 @@
                 type="text"
                 :disabled="!currentCourse"
                 icon="el-icon-edit"
-                @click="handleCourseUpdate"></el-button>
+                @click="handleCourseRename"></el-button>
               <el-button
                 title="刷新"
                 type="text"
@@ -100,11 +101,12 @@
                     class="el-icon-more">
                   </el-button>
                   <el-dropdown-menu slot="dropdown">
+                    <el-dropdown-item>更改名称</el-dropdown-item>
+                    <el-dropdown-item>下载</el-dropdown-item>
                     <el-dropdown-item
-                      @click="handleCourseworkRemove(scope.row)">删除
-                    </el-dropdown-item>
+                      @click="handleCourseworkRemove(scope.row)">删除</el-dropdown-item>
                     <el-dropdown-item divided>切换折行模式</el-dropdown-item>
-                    <el-dropdown-item>切换Tab宽度(4)</el-dropdown-item>
+                    <el-dropdown-item>选项设置</el-dropdown-item>
                   </el-dropdown-menu>
                 </el-dropdown>
               </template>
@@ -128,9 +130,14 @@ export default {
         courseId: Number,
     },
     computed: {
-        currentCourse: function () {
-            return this.courseIndex === undefined ? null : this.matchedCourses[this.courseIndex]
-        },
+        title: function () {
+            let text = []
+            if ( this.currentCourse )
+                text.push( this.currentCourse.title )
+            if ( this.currentCoursework )
+                text.push( this.currentCoursework.name )
+            return text.join( ': ' )
+        }
     },
     data() {
         return {
@@ -141,15 +148,12 @@ export default {
             courseworkData: [],
             loadingCourse: false,
             dirtyFlag: false,
+            cachedData: {},
         }
     },
     mounted() {
         connector.$on('api-login', this.onLogin)
         connector.$on('api-logout', this.onLogout)
-        this.$on('coder-select', this.$refs.editor.onSelectCoursework)
-        this.$on('coder-close', this.$refs.editor.onCloseCoursework)
-        this.$on('coder-save', this.$refs.editor.onSaveCoursework)
-
         if (connector.isAuthenticated)
             this.queryCourses()
     },
@@ -161,6 +165,7 @@ export default {
             this.currentCoursework = null
             this.courseworkData = []
             this.loadingCourse = false
+            this.cachedData = {}
         },
         refreshData() {
             this.clearData()
@@ -203,7 +208,10 @@ export default {
         },
         onListCourseItems: function (success, data) {
             if (success) {
-                data.forEach( item => item.dirty = false )
+                data.forEach( item => {
+                    item.dirty = false
+                    item.state = 0
+                } )
                 this.courseworkData = data
             }
         },
@@ -211,8 +219,7 @@ export default {
             if (success) {
                 this.courseData.push(data)
                 this.matchedCourses.push(data)
-                this.courseIndex = this.matchedCourses.length - 1
-                this.handleCourseChange()
+                this.handleCourseChange(this.matchedCourses.length - 1)
             }
         },
         onCourseRemoved: function (success) {
@@ -222,21 +229,20 @@ export default {
                 this.matchedCourses.splice(this.courseIndex, 1)
                 if (this.matchedCourses.length) {
                     if (this.courseIndex >= this.matchedCourses.length)
-                        this.courseIndex --
+                        this.handleCourseChange(this.courseIndex - 1)
                     else
-                        this.handleCourseChange()
+                        this.handleCourseChange(this.courseIndex)
                 }
                 else {
-                    this.courseIndex = undefined
-                    this.currentCoursework = undefined
-                    this.courseworkData = []
+                    this.handleCourseChange(undefined)
                 }
             }
         },
-        onCourseUpdated: function (success, data) {
+        onCourseRenamed: function (success, data) {
             if (success && this.currentCourse) {
                 this.currentCourse.title = data.title
                 this.$refs.course.$el.querySelector('input.el-input__inner').value = data.title
+                this.$emit( 'title-changed', this.title )
             }
         },
 
@@ -256,7 +262,7 @@ export default {
                 }
             })
         },
-        handleCourseUpdate: function () {
+        handleCourseRename: function () {
             if (this.currentCourse) {
                 this.$prompt('请输入课程的新名称', '修改课程', {
                     inputValue: this.currentCourse.title,
@@ -264,7 +270,7 @@ export default {
                     cancelButtonText: '取消',
                     callback: (action, instance) => {
                         if (action === 'confirm') {
-                            connector.$once('api-update-course', this.onCourseUpdated)
+                            connector.$once('api-update-course', this.onCourseRenamed)
                             connector.updateCourse({
                                 id: this.currentCourse.id,
                                 title: instance.inputValue
@@ -293,15 +299,28 @@ export default {
             this.refreshData()
             this.$refs.course.focus()
         },
-        handleCourseChange: function () {
-            if (this.currentCourse) {
-                this.queryCourseItems(this.currentCourse)
-            }
-            else {
-                this.currentCoursework = undefined
+        handleCourseChange: function ( index ) {
+            let prefix = 'pk_'
+            if ( this.currentCourse && this.courseworkData && this.courseworkData.length )
+                this.cachedData[ prefix + this.currentCourse.id ] = this.courseworkData
+
+            this.courseIndex = index
+            this.currentCourse =  index === undefined ? undefined : this.matchedCourses[index]
+
+            this.currentCoursework = undefined
+            this.$refs.editor.handleCourseworkSelect()
+
+            if ( this.currentCourse === undefined )
                 this.courseworkData = []
+
+            else {
+                let key = prefix + this.currentCourse.id
+                if ( Object.prototype.hasOwnProperty.call( this.cachedData, key ) )
+                    this.courseworkData = this.cachedData[ key ]
+                else
+                    this.queryCourseItems(this.currentCourse)
             }
-            this.$emit( 'coder-course-changed' )
+            this.$emit( 'title-changed', this.title )
         },
 
         //
@@ -310,8 +329,9 @@ export default {
         onCourseworkCreated: function (success, data) {
             if ( success ) {
                 data.dirty = false
+                data.state = 0
                 this.courseworkData.push( data )
-                this.$emit( 'coder-select', data )
+                this.handleCourseworkSelect( data )
             }
         },
         onCourseworkRemoved: function ( success ) {
@@ -337,7 +357,8 @@ export default {
         //
         handleCourseworkSelect: function ( coursework ) {
             this.currentCoursework = coursework
-            this.$emit( 'coder-select', coursework )
+            this.$refs.editor.handleCourseworkSelect( coursework )
+            this.$emit( 'title-changed', this.title )
         },
         handleCourseworkAdd: function () {
             this.$prompt('请输入文件名称', '创建代码文件', {
@@ -355,16 +376,28 @@ export default {
             })
         },
         handleCourseworkSave: function ( coursework ) {
-            this.$emit( 'coder-save', coursework )
+            this.$refs.editor.handleCourseworkSave( coursework )
         },
         handleCourseworkRename: function ( coursework ) {
-            this.$emit( 'coder-save', coursework )
+            if ( coursework ) {
+                this.$prompt('请输入文件的新名称', '修改文件名称', {
+                    inputValue: coursework.name,
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    callback: (action, instance) => {
+                        if (action === 'confirm') {
+                            coursework.name = instance.inputValue
+                            this.$refs.editor.handleCourseworkSave( coursework )
+                        }
+                    }
+                })
+            }
         },
         handleCourseworkRemove: function ( coursework ) {
             if ( coursework ) {
                 connector.$once( 'api-remove-coursework', this.onCoursewrokRemoved )
                 connector.removeCoursework( coursework )
-                this.$emit( 'coder-close', coursework )
+                 this.$refs.editor.handleCourseworkClose( coursework )
             }
         },
         handleCourseworkBuild: function ( coursework ) {
@@ -372,6 +405,42 @@ export default {
                 // connector.$once('api-build-coursework', this.onBuildCoursewrok)
                 connector.buildCoursework( coursework )
                 this.$emit( 'coder-build', coursework )
+            }
+        },
+
+        //
+        // Local file
+        //
+        onFileSelected: function () {
+            let file = this.$el.querySelector('input[type="file"]').files[0]
+            let reader = new FileReader()
+            let session = this.$refs.editor.getBuffer( this.currentCoursework ).session
+            reader.onload = (evt) => {
+                session.setValue(evt.target.result)
+                session.selection.clearSelection()
+                session.gotoLine(1)
+                session.focus()
+            }
+            reader.readAsText(file)
+        },
+        handleUploadFile: function () {
+            this.$el.querySelector('input[type="file"]').click()
+        },
+        handleDownloadFile: function ( coursework ) {
+            let buf = this.$refs.editor.getBuffer( coursework )
+            let text = buf && buf.session.getValue()
+            if (text && text.length) {
+                var blob = new Blob([text], {type: 'text/plain'})
+                var reader = new FileReader()
+                reader.onload = (evt) => {
+                    var a = document.createElement('a')
+                    a.href = evt.target.result
+                    a.setAttribute('download', coursework.name)
+                    a.click()
+                }
+                reader.readAsDataURL(blob)
+                // var url = URL.createObjectURL(blob);
+                // URL.revokeObjectURL(url);
             }
         },
     }
