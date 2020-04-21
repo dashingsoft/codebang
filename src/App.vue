@@ -1,66 +1,64 @@
 <template>
   <div id="app">
-    <el-container>
-      <el-header class="cb-navbar">
-        <div class="cb-brand">
-          <img src="./assets/logo.png">
-          <span>CodeBang</span>
-        </div>
-        <div class="cb-searchbox" style="display: none;">
-          <el-input
-            placeholder="请输入搜素内容"
-            prefix-icon="el-icon-search"
-            size="mini"
-            clearable>
-          </el-input>
-        </div>
-        <el-button
-          @click="activePage=0"
-          type="text">代码</el-button>
-        <el-button
-          @click="activePage=1"
-          type="text">编译</el-button>
-        <el-button
-          @click="activePage=2"
-          type="text">运行</el-button>
-        <div class="cb-title">
-          {{ title }}
-        </div>
-        <div class="cb-toolbox">
-          <el-button
-            icon="el-icon-bell"
-            type="text"></el-button>
-          <el-dropdown trigger="click" @command="handleUserMenu">
-            <el-button size="" type="text" class="el-icon-user">
-              <i class="el-icon-caret-bottom"></i>
-            </el-button>
-            <el-dropdown-menu slot="dropdown">
-              <template v-if="isAuthenticated">
-                <el-dropdown-item disabled>登陆为 {{ logonName }}</el-dropdown-item>
-                <el-dropdown-item command="logout" divided>注销</el-dropdown-item>
-              </template>
-              <template v-else>
-                <el-dropdown-item command="login">登陆</el-dropdown-item>
-              </template>
-              <el-dropdown-item command="profile" divided>偏好设置</el-dropdown-item>
-            </el-dropdown-menu>
-          </el-dropdown>
-        </div>
-      </el-header>
-      <div class="cb-main">
-        <div class="cb-container" v-show="activePage==0">
-          <cb-code-manager
-            v-on:title-changed="resetTitle"
-            ref="coder"></cb-code-manager>
-        </div>
-        <div class="cb-container" v-show="activePage==1">
-          <!-- <cb-builder></cb-builder> -->
-        </div>
-        <div class="cb-container" v-show="activePage==2">
-          <!-- <cb-runner></cb-runner> -->
-        </div>
+    <div class="cb-navbar cb-header">
+      <div class="cb-brand">
+        <img src="./assets/logo.png">
+        <span>CodeBang</span>
       </div>
-    </el-container>
+      <div class="cb-searchbox" style="display: none;">
+        <el-input
+          placeholder="请输入搜素内容"
+          prefix-icon="el-icon-search"
+          size="mini"
+          clearable>
+        </el-input>
+      </div>
+      <el-button
+        @click="activePage=0"
+        type="text">代码</el-button>
+      <el-button
+        @click="activePage=1"
+        type="text">编译</el-button>
+      <el-button
+        @click="activePage=2"
+        type="text">运行</el-button>
+      <div class="cb-title">
+        {{ title }}
+      </div>
+      <div class="cb-toolbox">
+        <el-button
+          icon="el-icon-bell"
+          type="text"></el-button>
+        <el-dropdown trigger="click" @command="handleUserMenu">
+          <el-button size="" type="text" class="el-icon-user">
+            <i class="el-icon-caret-bottom"></i>
+          </el-button>
+          <el-dropdown-menu slot="dropdown">
+            <template v-if="isAuthenticated">
+              <el-dropdown-item disabled>登陆为 {{ logonName }}</el-dropdown-item>
+              <el-dropdown-item command="logout" divided>注销</el-dropdown-item>
+            </template>
+            <template v-else>
+              <el-dropdown-item command="login">登陆</el-dropdown-item>
+            </template>
+            <el-dropdown-item command="profile" divided>偏好设置</el-dropdown-item>
+          </el-dropdown-menu>
+        </el-dropdown>
+      </div>
+    </div>
+    <div class="cb-main">
+      <div class="cb-container" v-show="activePage==0">
+        <cb-code-manager
+          v-on:title-changed="resetTitle"
+          ref="coder"></cb-code-manager>
+      </div>
+      <div class="cb-container" v-show="activePage==1">
+        <!-- <cb-builder></cb-builder> -->
+      </div>
+      <div class="cb-container" v-show="activePage==2">
+        <!-- <cb-runner></cb-runner> -->
+      </div>
+    </div>
   </div>
 </template>
 
@@ -95,10 +93,17 @@ export default {
         this.isAuthenticated = connector.isAuthenticated
         if (this.isAuthenticated)
             connector.getLogon()
+
+        this.resizeEditor()
     },
     methods: {
         resetTitle( title ) {
             this.title = title
+        },
+        resizeEditor() {
+            // var navbar = document.querySelector('.cb-navbar')
+            // var rect = navbar.getBoundingClientRect()
+            this.$el.querySelector( '.cb-main' ).style.height = ( window.innerHeight - 60 ) + 'px'
         },
 
         handleUserMenu: function (command) {
@@ -129,7 +134,12 @@ body {
 #app {
   font-family: 'Avenir', Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+        -moz-osx-font-smoothing: grayscale;
+}
+
+.cb-header {
+    height: 60px;
+    padding: 0 16px;
 }
 
 .cb-navbar {

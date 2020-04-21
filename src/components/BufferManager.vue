@@ -1,5 +1,5 @@
 <template>
-  <div class="cb-editor cb-container"></div>
+    <div class="cb-editor cb-container"></div>
 </template>
 
 <script>
@@ -24,9 +24,7 @@ export default {
         }
     },
     mounted() {
-        if ( ! this.$el.style.height )
-            this.resizeEditor()
-
+        this.$el.style.height = "100%"
         this.editor = ace.edit( this.$el, {
             mode: this.mode,
             theme: this.theme,
@@ -41,11 +39,6 @@ export default {
         this.editor.focus()
     },
     methods: {
-        resizeEditor() {
-            var navbar = document.querySelector('.cb-navbar')
-            var rect = navbar.getBoundingClientRect()
-            this.$el.style.height = ( window.innerHeight - rect.bottom - 4 ) + 'px'
-        },
         saveBuffer() {
             connector.updateCoursework()
         },

@@ -1,129 +1,127 @@
 <template>
-  <el-container class="cb-container">
+  <el-container class="cb-coder h-100">
     <input type="file" accept=".c,.h" style="display:none" @change="onFileSelected">
-    <el-aside style="padding: 2px">
-      <div class="cb-code-manager cb-container">
-        <el-card class="cb-container">
-          <div class="cb-navbar">
-            <span>课程管理</span>
-            <div class="cb-toolbox">
-              <el-button
-                title="删除当前课程和相关的课程文件"
-                type="text"
-                :disabled="!currentCourse"
-                icon="el-icon-delete"
-                @click="handleCourseRemove"></el-button>
-              <el-button
-                title="修改课程名称"
-                type="text"
-                :disabled="!currentCourse"
-                icon="el-icon-edit"
-                @click="handleCourseRename"></el-button>
-              <el-button
-                title="刷新"
-                type="text"
-                icon="el-icon-refresh-right"
-                @click="handleCourseRefresh"></el-button>
-              <el-button
-                title="新增课程"
-                type="text"
-                icon="el-icon-document-add"
-                @click="handleCourseAdd"></el-button>
-            </div>
+    <el-aside>
+      <div class="cb-card">
+        <div class="cb-navbar">
+          <span>课程管理</span>
+          <div class="cb-toolbox">
+            <el-button
+              title="删除当前课程和相关的课程文件"
+              type="text"
+              :disabled="!currentCourse"
+              icon="el-icon-delete"
+              @click="handleCourseRemove"></el-button>
+            <el-button
+              title="修改课程名称"
+              type="text"
+              :disabled="!currentCourse"
+              icon="el-icon-edit"
+              @click="handleCourseRename"></el-button>
+            <el-button
+              title="刷新"
+              type="text"
+              icon="el-icon-refresh-right"
+              @click="handleCourseRefresh"></el-button>
+            <el-button
+              title="新增课程"
+              type="text"
+              icon="el-icon-document-add"
+              @click="handleCourseAdd"></el-button>
           </div>
-          <el-select
-            ref="course"
-            v-model="courseIndex"
-            @change="handleCourseChange"
-            class="w-100"
-            filterable
-            clearable
-            remote
-            :remote-method="onFilterCourse"
-            :loading="loadingCourse"
-            placeholder="请选择课程">
-            <el-option
-              v-for="(item, index) in matchedCourses"
-              :key="item.id"
-              :label="item.title"
-              :value="index">
-            </el-option>
-          </el-select>
-          <el-table
-            :data="courseworkData"
-            empty-text="没有内容"
-            highlight-current-row
-            @current-change="handleCourseworkSelect">
-            <el-table-column
-              property="name"
-              sortable
-              label="课程文件">
-              <template v-slot="scope">
-                <span
-                  v-bind:class="{ 'cb-red-dot': courseworkData[scope.$index].dirty }">
-                  {{ scope.row.name }}
-                </span>
-              </template>
-            </el-table-column>
-            <el-table-column
-              fixed="right"
-              align="right"
-              width="80">
-              <template v-slot:header>
+        </div>
+        <el-select
+          ref="course"
+          v-model="courseIndex"
+          @change="handleCourseChange"
+          class="w-100"
+          filterable
+          clearable
+          remote
+          :remote-method="onFilterCourse"
+          :loading="loadingCourse"
+          placeholder="请选择课程">
+          <el-option
+            v-for="(item, index) in matchedCourses"
+            :key="item.id"
+            :label="item.title"
+            :value="index">
+          </el-option>
+        </el-select>
+        <el-table
+          :data="courseworkData"
+          empty-text="没有内容"
+          highlight-current-row
+          @current-change="handleCourseworkSelect">
+          <el-table-column
+            property="name"
+            sortable
+            label="课程文件">
+            <template v-slot="scope">
+              <span
+                v-bind:class="{ 'cb-red-dot': courseworkData[scope.$index].dirty }">
+                {{ scope.row.name }}
+              </span>
+            </template>
+          </el-table-column>
+          <el-table-column
+            fixed="right"
+            align="right"
+            width="80">
+            <template v-slot:header>
+              <el-button
+                title="新增文件"
+                type="primary"
+                plain
+                size="mini"
+                icon="el-icon-plus"
+                @click="handleCourseworkAdd"></el-button>
+              <el-button
+                title="保存文件"
+                type="primary"
+                plain
+                size="mini"
+                icon="el-icon-document-copy"
+                @click="handleCourseworkSave"></el-button>
+            </template>
+            <template v-slot:default="scope">
+              <el-button
+                title="编译和运行"
+                type="primary"
+                size="mini"
+                plain
+                icon="el-icon-position"
+                @click="handleCourseworkBuild(scope.row)"></el-button>
+              <el-dropdown trigger="hover">
                 <el-button
-                  title="新增文件"
+                  size="mini"
                   type="primary"
                   plain
-                  size="mini"
-                  icon="el-icon-plus"
-                  @click="handleCourseworkAdd"></el-button>
-                <el-button
-                  title="保存文件"
-                  type="primary"
-                  plain
-                  size="mini"
-                  icon="el-icon-document-copy"
-                  @click="handleCourseworkSave"></el-button>
-              </template>
-              <template v-slot:default="scope">
-                <el-button
-                  title="编译和运行"
-                  type="primary"
-                  size="mini"
-                  plain
-                  icon="el-icon-position"
-                  @click="handleCourseworkBuild(scope.row)"></el-button>
-                <el-dropdown trigger="hover">
-                  <el-button
-                    size="mini"
-                    type="primary"
-                    plain
-                    class="el-icon-more">
-                  </el-button>
-                  <el-dropdown-menu slot="dropdown">
-                    <el-dropdown-item>更改名称</el-dropdown-item>
-                    <el-dropdown-item>下载</el-dropdown-item>
-                    <el-dropdown-item
-                      @click="handleCourseworkRemove(scope.row)">删除</el-dropdown-item>
-                    <el-dropdown-item divided>切换折行模式</el-dropdown-item>
-                    <el-dropdown-item>选项设置</el-dropdown-item>
-                  </el-dropdown-menu>
-                </el-dropdown>
-              </template>
-            </el-table-column>
-          </el-table>
-          <el-pagination
-            small
-            layout="prev, pager, next"
-            :hide-on-single-page="true"
-            :total="5">
-          </el-pagination>
-        </el-card>
+                  class="el-icon-more">
+                </el-button>
+                <el-dropdown-menu slot="dropdown">
+                  <el-dropdown-item>更改名称</el-dropdown-item>
+                  <el-dropdown-item>下载</el-dropdown-item>
+                  <el-dropdown-item
+                    @click="handleCourseworkRemove(scope.row)">删除</el-dropdown-item>
+                  <el-dropdown-item divided>切换折行模式</el-dropdown-item>
+                  <el-dropdown-item>选项设置</el-dropdown-item>
+                </el-dropdown-menu>
+              </el-dropdown>
+            </template>
+          </el-table-column>
+        </el-table>
+        <el-pagination
+          small
+          layout="prev, pager, next"
+          :hide-on-single-page="true"
+          :total="5">
+        </el-pagination>
       </div>
     </el-aside>
-    <el-main style="padding: 2px;">
+    <div class="cb-container">
       <cb-buffer-manager ref="editor"></cb-buffer-manager>
-    </el-main>
+    </div>
   </el-container>
 </template>
 
@@ -455,76 +453,84 @@ export default {
 
 <style>
 /* Color themem */
-.cb-code-manager .el-card,
-.cb-code-manager .el-card .el-input__inner,
-.cb-code-manager .el-card .el-pagination,
-.cb-code-manager .el-card .el-pagination li,
-.cb-code-manager .el-card .el-pagination button,
-.cb-code-manager .el-card .el-table,
-.cb-code-manager .el-card .el-table * {
+.cb-coder .cb-card .el-input__inner,
+.cb-coder .cb-card .el-pagination,
+.cb-coder .cb-card .el-pagination li,
+.cb-coder .cb-card .el-pagination button,
+.cb-coder .cb-card .el-table,
+.cb-coder .cb-card .el-table * {
     background-color: inherit;
     color: inherit;
 }
 
-.cb-code-manager .el-card .el-table .el-table__body tr.current-row.hover-row td,
-.cb-code-manager .el-card .el-table .el-table__body tr:hover {
+.cb-coder .cb-card .el-table .el-table__body tr.current-row.hover-row td,
+.cb-coder .cb-card .el-table .el-table__body tr:hover {
     background-color: #3f3f3f;
 }
 
-.cb-code-manager .el-card .el-table .el-table__body tr.current-row {
+.cb-coder .cb-card .el-table .el-table__body tr.current-row {
     background-color: #454545;
 }
 
-.cb-code-manager .el-card,
-.cb-code-manager .el-card .el-input__inner {
+.cb-coder .cb-card {
+    border: 0;
+}
+
+.cb-coder .el-aside,
+.cb-coder .cb-card .el-input__inner {
     border: 1px solid #666;
 }
 
-.cb-code-manager .el-card .el-table td,
-.cb-code-manager .el-card .el-table th.is-leaf {
+.cb-coder .cb-card .el-table td,
+.cb-coder .cb-card .el-table th.is-leaf {
     border-bottom: 1px solid #666;
 }
 
-.cb-code-manager .el-card .el-table .el-table__body tr > td:first-child {
+.cb-coder .cb-card .el-table .el-table__body tr > td:first-child {
     /* border-left: 1px solid #666; */
 }
-.cb-code-manager .el-card .el-table .el-table__body tr > td:last-child {
+.cb-coder .cb-card .el-table .el-table__body tr > td:last-child {
     /* border-right: 1px solid #666; */
 }
 
-.cb-code-manager .el-card .el-table::before,
-.cb-code-manager .el-card .el-table .el-table__fixed-right::before {
+.cb-coder .cb-card .el-table::before,
+.cb-coder .cb-card .el-table .el-table__fixed-right::before {
     background-color: #666;
 }
 
-.cb-code-manager .el-card__body .el-table .el-button {
+.cb-coder .cb-card .el-table .el-button {
     border: 0;
 }
 
 /* Padding and margin */
-.cb-code-manager .el-card__body {
+.cb-coder .cb-card {
     padding: 9px 16px;
+    max-height: 100%;
 }
 
-.cb-code-manager .el-card__body > * {
+.cb-coder .cb-card > * {
     margin-bottom: 9px;
 }
 
-.cb-code-manager .el-card__body .el-table td {
+.cb-coder .cb-card > *:last-child {
+    margin-bottom: 9px;
+}
+
+.cb-coder .cb-card .el-table td {
     padding: 6px 0;
     cursor: pointer;
 }
 
-.cb-code-manager .el-card__body .el-button {
+.cb-coder .cb-card .el-button {
     padding: 2px 6px;
     margin-left: 6px;
 }
 
-.cb-code-manager .el-card__body .el-table .is-right > .cell {
+.cb-coder .cb-card .el-table .is-right > .cell {
     padding: 0 6px;
 }
 
-.cb-code-manager .el-card .el-pagination {
+.cb-coder .cb-card .el-pagination {
     text-align: center;
     margin-top: 16px;
 }
@@ -539,5 +545,4 @@ export default {
     left: 2px;
     border-radius: 50%;
 }
-
 </style>
