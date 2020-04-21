@@ -112,6 +112,12 @@
               </template>
             </el-table-column>
           </el-table>
+          <el-pagination
+            small
+            layout="prev, pager, next"
+            :hide-on-single-page="true"
+            :total="5">
+          </el-pagination>
         </el-card>
       </div>
     </el-aside>
@@ -451,6 +457,9 @@ export default {
 /* Color themem */
 .cb-code-manager .el-card,
 .cb-code-manager .el-card .el-input__inner,
+.cb-code-manager .el-card .el-pagination,
+.cb-code-manager .el-card .el-pagination li,
+.cb-code-manager .el-card .el-pagination button,
 .cb-code-manager .el-card .el-table,
 .cb-code-manager .el-card .el-table * {
     background-color: inherit;
@@ -477,10 +486,10 @@ export default {
 }
 
 .cb-code-manager .el-card .el-table .el-table__body tr > td:first-child {
-    border-left: 1px solid #666;
+    /* border-left: 1px solid #666; */
 }
 .cb-code-manager .el-card .el-table .el-table__body tr > td:last-child {
-    border-right: 1px solid #666;
+    /* border-right: 1px solid #666; */
 }
 
 .cb-code-manager .el-card .el-table::before,
@@ -513,6 +522,11 @@ export default {
 
 .cb-code-manager .el-card__body .el-table .is-right > .cell {
     padding: 0 6px;
+}
+
+.cb-code-manager .el-card .el-pagination {
+    text-align: center;
+    margin-top: 16px;
 }
 
 .cb-red-dot::after {

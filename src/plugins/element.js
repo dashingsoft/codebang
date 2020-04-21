@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import {
-    // Pagination,
+    Pagination,
     Dialog,
     // Autocomplete,
     Dropdown,
@@ -84,7 +84,7 @@ import locale from 'element-ui/lib/locale'
 
 locale.use(lang)
 
-// Vue.use(Pagination);
+Vue.use(Pagination);
 Vue.use(Dialog);
 // Vue.use(Autocomplete);
 Vue.use(Dropdown);

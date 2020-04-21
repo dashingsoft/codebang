@@ -24,10 +24,10 @@ export default {
         }
     },
     mounted() {
-        if (!this.$el.style.height)
+        if ( ! this.$el.style.height )
             this.resizeEditor()
 
-        this.editor = ace.edit(this.$el, {
+        this.editor = ace.edit( this.$el, {
             mode: this.mode,
             theme: this.theme,
             fontSize: this.fontSize,
@@ -40,13 +40,11 @@ export default {
         this.scratch.setTabSize(this.tabSize)
         this.editor.focus()
     },
-    computed: {
-    },
     methods: {
         resizeEditor() {
             var navbar = document.querySelector('.cb-navbar')
             var rect = navbar.getBoundingClientRect()
-            this.$el.style.height = (window.innerHeight - rect.bottom - 4) + 'px'
+            this.$el.style.height = ( window.innerHeight - rect.bottom - 4 ) + 'px'
         },
         saveBuffer() {
             connector.updateCoursework()
