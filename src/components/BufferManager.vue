@@ -21,7 +21,7 @@ export default {
         return {
             editor: null,
             scratch: null,
-            bufferIndex: undefined,
+            buffer: null,
             bufferList: [],
             mode: 'ace/mode/c_cpp',
             theme: 'ace/theme/twilight',
@@ -43,18 +43,11 @@ export default {
         });
         // this.editor.renderer.setScrollMargin(10, 10, 10, 10);
         this.scratch = this.editor.getSession()
-        this.scratch.setUseWrapMode(this.wrapMode);
-        this.scratch.setTabSize(this.tabSize);
-        this.editor.focus();
+        this.scratch.setUseWrapMode(this.wrapMode)
+        this.scratch.setTabSize(this.tabSize)
+        this.editor.focus()
     },
     computed: {
-        buffer: function (coursework) {
-            if (coursework && coursework.id)
-                for (let i = 0; i < this.bufferList.length; i ++)
-                    if (this.bufferList[i].coursework.id === coursework.id)
-                        return this.bufferList[i]
-            return undefined
-        },
     },
     methods: {
         resizeEditor() {
@@ -65,42 +58,91 @@ export default {
         saveBuffer() {
             connector.updateCoursework()
         },
-        selectBuffer(index) {
-            if (index === undefined || index === -1 || index >= this.bufferList.length) {
-                this.bufferIndex = undefined
-                this.editor.setSession(this.scratch)
+        getBuffer( coursework ) {
+            let i = this.getIndex( coursework )
+            return i === undefined ? null : this.bufferList[i]
+        },
+        getIndex( coursework ) {
+            if ( coursework && coursework.id )
+                for ( let index = 0; index < this.bufferList.length; index ++ )
+                    if ( this.bufferList[index].coursework.id === coursework.id )
+                        return index
+            return undefined
+        },
+        selectBuffer(buffer) {
+            if ( ! buffer ) {
+                this.buffer = null
+                this.editor.setSession( this.scratch )
             }
-            else if (this.bufferIndex !== index) {
-                this.bufferIndex = index
-                this.editor.setSession( this.bufferList[index].buffer )
+            else {
+                this.buffer = buffer
+                this.editor.setSession( buffer.session )
             }
         },
 
-        onBufferSelected: function (coursework) {
-            if (!coursework) {
-                this.selectBuffer()
-                return
+        // onXXX for coursework
+        onSelectCoursework: function (coursework) {
+            if ( ! coursework ) {
+                this.selectBuffer( null )
             }
-
-            for (let index = 0; index < this.bufferList.length; index ++)
-                if (this.bufferList[index].coursework.id === coursework.id) {
-                    this.selectBuffer(index)
-                    return
+            else {
+                let buf = this.getBuffer( coursework )
+                if ( buf ) {
+                    if ( buf.coursework !== coursework ) {
+                        coursework.dirty = buf.session.$modified
+                        buf.coursework = coursework
+                    }
+                    this.selectBuffer( buf )
                 }
-
-            connector.$once('api-get-coursework-content', ( success, data ) => {
-                if ( success ) {
-                    let buf = new ace.EditSession( data )
-                    buf.setMode(this.mode)
-                    buf.on('change', () => coursework.dirty = true )
-                    this.bufferList.push( {
-                        coursework: coursework,
-                        buffer: buf
+                else {
+                    connector.$once('api-get-coursework-content', ( success, data ) => {
+                        if ( success ) {
+                            let session = new ace.EditSession( data )
+                            let buf =  {
+                                coursework: coursework,
+                                session: session
+                            }
+                            session.setMode( this.mode )
+                            session.on( 'change', () => {
+                                buf.coursework.dirty = session.$modified
+                            } )
+                            this.bufferList.push( buf )
+                            this.selectBuffer( buf )
+                        }
                     } )
-                    this.selectBuffer( this.bufferList.length - 1 )
+                    connector.getCourseworkContent( coursework )
+                }
+            }
+        },
+        onCloseCoursework: function ( coursework ) {
+            if ( coursework === undefined ) {
+                this.editor.setSession( this.scratch )
+                this.bufferList.forEach( buf => delete buf.session )
+                this.bufferList = []
+            }
+            else {
+                let buf = this.getBuffer( coursework )
+                if ( buf ) {
+                    if ( buf === this.buffer ) {
+                        this.editor.setSession( this.scratch )
+                        this.buffer = null
+                    }
+                    delete buf.session
+                    this.bufferList.pop( this.getIndex( coursework ) )
+                }
+            }
+        },
+        onSaveCoursework: function ( coursework ) {
+            let buffers = coursework ? this.bufferList : [ this.getBuffer( coursework ) ]
+            buffers.forEach( buf => {
+                if ( buf && buf.dirty ) {
+                    connector.$once('api-update-coursework-content', function ( success ) {
+                        if ( success )
+                            buf.coursework.dirty = false
+                    } )
+                    connector.updateCourseworkContent( buf.coursework, buf.session.getValue() )
                 }
             } )
-            connector.getCourseworkContent(coursework)
         },
 
         onLocalFileSelected: function () {

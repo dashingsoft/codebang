@@ -24,10 +24,10 @@
           @click="activePage=2"
           type="text">运行</el-button>
         <div class="cb-title">
-          {{ displayTitle }}
+          {{ title }}
           <el-button
             title="修改文件名称"
-            v-show="displayTitle"
+            v-show="title"
             icon="el-icon-edit"
             size="small"
             type="text"></el-button>
@@ -73,13 +73,9 @@ import connector from './connector.js'
 
 export default {
     name: 'app',
-    computed: {
-        displayTitle: function () {
-            return ''
-        },
-    },
     data() {
         return {
+            title: '',
             logonName: '',
             isAuthenticated: false,
             activePage: 0,
@@ -99,11 +95,19 @@ export default {
             if (success)
                 this.logonName = data.username
         } )
+
         this.isAuthenticated = connector.isAuthenticated
         if (this.isAuthenticated)
             connector.getLogon()
     },
     methods: {
+        resetTitle() {
+            let coder = this.$refs && this.$refs.coder
+            this.title = ! coder ? '' :
+                ( coder.currentCourse ? coder.currentCourse.title + ' - ' : '' ) +
+                + ( coder.currentCoursework ? coder.currentCoursework.name : '' )
+        },
+
         handleUserMenu: function (command) {
             if (command == 'login')
                 connector.login('admin', 'admin')

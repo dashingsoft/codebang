@@ -52,7 +52,7 @@
             :data="courseworkData"
             empty-text="没有内容"
             highlight-current-row
-            @current-change="handleCourseworkChange">
+            @current-change="handleCourseworkSelect">
             <el-table-column
               property="name"
               sortable
@@ -146,11 +146,12 @@ export default {
     mounted() {
         connector.$on('api-login', this.onLogin)
         connector.$on('api-logout', this.onLogout)
-        this.$on('coder-select-file', this.$refs.editor.onBufferSelected)
-        // this.$watch( this.dirtyFlag, value => {
-        //     if (value)
-        //         this.setSaveFlags()
-        // } )
+        this.$on('coder-select', this.$refs.editor.onSelectCoursework)
+        this.$on('coder-close', this.$refs.editor.onCloseCoursework)
+        this.$on('coder-save', this.$refs.editor.onSaveCoursework)
+
+        if (connector.isAuthenticated)
+            this.queryCourses()
     },
     methods: {
         clearData() {
@@ -174,13 +175,6 @@ export default {
             connector.listCourseItems(course)
         },
 
-        onFilterCourse: function (query) {
-            if (this.courseData) {
-                this.matchedCourses = this.courseData.filter( item => {
-                    return item.title.indexOf(query) > -1
-                } )
-            }
-         },
         onLogin: function (success) {
             if (success)
                 this.refreshData()
@@ -189,6 +183,17 @@ export default {
             if (success)
                 this.clearData()
         },
+
+        //
+        // onCourseXXX
+        //
+        onFilterCourse: function (query) {
+            if (this.courseData) {
+                this.matchedCourses = this.courseData.filter( item => {
+                    return item.title.indexOf(query) > -1
+                } )
+            }
+         },
         onListCourses: function (success, data) {
             this.loadingCourse = false
             if (success) {
@@ -235,6 +240,9 @@ export default {
             }
         },
 
+        //
+        // handleCourseXXX
+        //
         handleCourseAdd: function () {
             this.$prompt('请输入课程名称', '创建课程', {
                 inputValue: '第一节课',
@@ -293,18 +301,43 @@ export default {
                 this.currentCoursework = undefined
                 this.courseworkData = []
             }
+            this.$emit( 'coder-course-changed' )
         },
 
+        //
+        // onCourseworkXXX
+        //
         onCourseworkCreated: function (success, data) {
-            if (success) {
-                this.courseworkData.push(data)
-                this.$emit('coder-new-file', data)
+            if ( success ) {
+                data.dirty = false
+                this.courseworkData.push( data )
+                this.$emit( 'coder-select', data )
+            }
+        },
+        onCourseworkRemoved: function ( success ) {
+            if ( success && this.currentCoursework ) {
+                for ( let index = 0; index < this.courseworkData.length; index ++ )
+                    if ( this.courseworkData[ index ] === this.currentCoursework ) {
+                        this.currentCoursework = undefined
+                        this.courseworkData.pop( index )
+
+                        if ( ! this.courseworkData.length )
+                            this.handleCourseworkSelect( undefined )
+                        else if ( index < this.courseworkData.length )
+                            this.handleCourseworkSelect( this.courseworkData[ index ] )
+                        else
+                            this.handleCourseworkSelect( this.courseworkData[ index - 1 ] )
+                        break
+                    }
             }
         },
 
-        handleCourseworkChange: function (coursework) {
+        //
+        // handleCourseworkXXX
+        //
+        handleCourseworkSelect: function ( coursework ) {
             this.currentCoursework = coursework
-            this.$emit('coder-select-file', coursework)
+            this.$emit( 'coder-select', coursework )
         },
         handleCourseworkAdd: function () {
             this.$prompt('请输入文件名称', '创建代码文件', {
@@ -321,29 +354,25 @@ export default {
                 }
             })
         },
-        handleCourseworkSave: function () {
-            if (this.currentCoursework) {
-                connector.$once('api-save-coursework', this.onUpdateCoursewrok)
-                connector.updateCoursework(this.currentCoursework)
-                this.$emit('coder-save-file', this.currentCoursework)
+        handleCourseworkSave: function ( coursework ) {
+            this.$emit( 'coder-save', coursework )
+        },
+        handleCourseworkRename: function ( coursework ) {
+            this.$emit( 'coder-save', coursework )
+        },
+        handleCourseworkRemove: function ( coursework ) {
+            if ( coursework ) {
+                connector.$once( 'api-remove-coursework', this.onCoursewrokRemoved )
+                connector.removeCoursework( coursework )
+                this.$emit( 'coder-close', coursework )
             }
         },
-        handleCourseworkRename: function () {
-            if (this.currentCoursework) {
-                connector.$once('api-update-coursework-name', this.onUpdateCoursewrok)
-                connector.updateCoursework(this.currentCoursework)
-                this.$emit('coder-rename-file', this.currentCoursework)
+        handleCourseworkBuild: function ( coursework ) {
+            if ( coursework ) {
+                // connector.$once('api-build-coursework', this.onBuildCoursewrok)
+                connector.buildCoursework( coursework )
+                this.$emit( 'coder-build', coursework )
             }
-        },
-        handleCourseworkRemove: function (coursework) {
-            connector.$once('api-remove-coursework', this.onRemoveCoursewrok)
-            connector.removeCoursework(coursework)
-            this.$emit('coder-remove-file', coursework)
-        },
-        handleCourseworkBuild: function (coursework) {
-            connector.$once('api-build-coursework', this.onBuildCoursewrok)
-            connector.buildCoursework(coursework)
-            this.$emit('coder-build-file', coursework)
         },
     }
 }
@@ -416,4 +445,16 @@ export default {
 .cb-code-manager .el-card__body .el-table .is-right > .cell {
     padding: 0 6px;
 }
+
+.cb-red-dot::after {
+    background-color: rgba(245, 110, 110, 0.3);
+    content: '';
+    height: 9px;
+    width: 9px;
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    border-radius: 50%;
+}
+
 </style>

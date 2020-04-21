@@ -307,6 +307,14 @@ export default new Vue({
             const api = '/api/courseworks/' + coursework.id + '/content/'
             this.sendRequest(api, { responseType: 'blob' }, 'api-get-coursework-content')
         },
+        updateCourseworkContent: function (coursework, content) {
+            const api = '/api/courseworks/' + coursework.id
+            let files = []
+            files.push(['source', coursework.name, content])
+            let args = []
+            args.push([ 'id', coursework.id])
+            this.sendRequest(api, make_multipart_data(args, files), 'api-update-coursework-content')
+        },
         buildCoursework: function (coursework) {
             const api = '/api/courseworks/' + coursework.id + '/build/'
             this.sendRequest(api, { data: coursework }, 'api-build-coursework')
