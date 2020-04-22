@@ -35,6 +35,7 @@
           v-model="courseIndex"
           @change="handleCourseChange"
           class="w-100"
+          size="small"
           filterable
           clearable
           remote
@@ -51,6 +52,7 @@
         <el-table
           :data="courseworkData"
           empty-text="没有内容"
+          size="small"
           highlight-current-row
           @current-change="handleCourseworkSelect">
           <el-table-column
@@ -92,7 +94,10 @@
                 plain
                 icon="el-icon-position"
                 @click="handleCourseworkBuild( scope.row )"></el-button>
-              <el-dropdown trigger="hover" @command="handleCourseworkCommand">
+              <el-dropdown
+                trigger="hover"
+                size="mini"
+                @command="handleCourseworkCommand">
                 <el-button
                   size="mini"
                   type="primary"
@@ -448,10 +453,12 @@ export default {
                 this.handleBufferSetting( command.coursework )
         },
         handleWrapModeToggle: function ( coursework ) {
-            this.$refs.editor.handleCourseworkSetting( coursework )
+            this.$refs.editor.handleCourseworkChangeSetting( coursework, {
+                wrapMode: 'toggle',
+            } )
         },
         handleBufferSetting: function ( coursework ) {
-            this.$refs.editor.handleCourseworkSetting( coursework )
+            this.$refs.editor.handleCourseworkChangeSetting( coursework )
         },
 
         //
@@ -511,8 +518,30 @@ export default {
     background-color: #454545;
 }
 
+.cb-coder .cb-card .el-table::before,
+.cb-coder .cb-card .el-table .el-table__fixed-right::before {
+    background-color: #666;
+}
+
+/* Border, padding and margin */
 .cb-coder .cb-card {
     border: 0;
+    padding: 9px 16px;
+    max-height: 100%;
+}
+
+.cb-coder .cb-card > * {
+    margin-bottom: 9px;
+}
+
+.cb-coder .cb-card .el-button {
+    border: 0;
+    padding: 2px 6px;
+    margin-left: 6px;
+}
+
+.cb-coder .cb-card .el-table td {
+    cursor: pointer;
 }
 
 .cb-coder .el-aside,
@@ -532,39 +561,7 @@ export default {
     /* border-right: 1px solid #666; */
 }
 
-.cb-coder .cb-card .el-table::before,
-.cb-coder .cb-card .el-table .el-table__fixed-right::before {
-    background-color: #666;
-}
-
-.cb-coder .cb-card .el-table .el-button {
-    border: 0;
-}
-
-/* Padding and margin */
-.cb-coder .cb-card {
-    padding: 9px 16px;
-    max-height: 100%;
-}
-
-.cb-coder .cb-card > * {
-    margin-bottom: 9px;
-}
-
-.cb-coder .cb-card .el-table td {
-    padding: 6px 0;
-    cursor: pointer;
-}
-
-.cb-coder .cb-card .el-button {
-    padding: 2px 6px;
-    margin-left: 6px;
-}
-
-.cb-coder .cb-card .el-table .is-right > .cell {
-    padding: 0 6px;
-}
-
+/* Status */
 .cb-red-dot::after {
     background-color: rgba(245, 110, 110, 0.3);
     content: '';

@@ -86,6 +86,7 @@ export default {
                                 session: session
                             }
                             session.setMode( this.mode )
+                            session.setUseWrapMode(this.wrapMode)
                             session.on( 'change', () => {
                                 buf.coursework.dirty = true
                             } )
@@ -129,6 +130,15 @@ export default {
                     connector.updateCourseworkContent( buf.coursework, buf.session.getValue() )
                 }
             } )
+        },
+        handleCourseworkChangeSetting: function ( coursework, options ) {
+            let buf = this.getBuffer( coursework )
+            if ( buf && options ) {
+                if ( Object.prototype.hasOwnProperty.call( options, 'wrapMode' ) )
+                    buf.session.setUseWrapMode( ! this.wrapMode )
+                else if ( Object.prototype.hasOwnProperty.call( options, 'tabSize' ) )
+                    buf.session.setTabSize( options.tabSize )
+            }
         },
     }
 }

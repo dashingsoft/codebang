@@ -29,7 +29,10 @@
         <el-button
           icon="el-icon-bell"
           type="text"></el-button>
-        <el-dropdown trigger="click" @command="handleUserMenu">
+        <el-dropdown
+          trigger="click"
+          size="small"
+          @command="handleUserMenu">
           <el-button size="" type="text" class="el-icon-user">
             <i class="el-icon-caret-bottom"></i>
           </el-button>
