@@ -403,6 +403,7 @@ export default {
                     callback: (action, instance) => {
                         if (action === 'confirm') {
                             coursework.name = instance.inputValue
+                            coursework.dirty = true
                             this.$refs.editor.handleCourseworkSave( coursework )
                         }
                     }
