@@ -91,8 +91,8 @@
                 size="mini"
                 plain
                 icon="el-icon-position"
-                @click="handleCourseworkBuild(scope.row)"></el-button>
-              <el-dropdown trigger="hover">
+                @click="handleCourseworkBuild( scope.row )"></el-button>
+              <el-dropdown trigger="hover" @command="handleCourseworkCommand">
                 <el-button
                   size="mini"
                   type="primary"
@@ -100,23 +100,32 @@
                   class="el-icon-more">
                 </el-button>
                 <el-dropdown-menu slot="dropdown">
-                  <el-dropdown-item>更改名称</el-dropdown-item>
-                  <el-dropdown-item>下载</el-dropdown-item>
                   <el-dropdown-item
-                    @click="handleCourseworkRemove(scope.row)">删除</el-dropdown-item>
-                  <el-dropdown-item divided>切换折行模式</el-dropdown-item>
-                  <el-dropdown-item>选项设置</el-dropdown-item>
+                    :command="{ action: 'rename', coursework: scope.row }">
+                    更改名称
+                  </el-dropdown-item>
+                  <el-dropdown-item
+                    :command="{ action: 'delete', coursework: scope.row }">
+                    删除
+                  </el-dropdown-item>
+                  <el-dropdown-item
+                    :command="{ action: 'download', coursework: scope.row }">
+                    下载
+                  </el-dropdown-item>
+                  <el-dropdown-item
+                    divided
+                    :command="{ action: 'wrapmode', coursework: scope.row }">
+                    切换折行模式
+                  </el-dropdown-item>
+                  <el-dropdown-item
+                    :command="{ action: 'options', coursework: scope.row }">
+                    选项设置
+                  </el-dropdown-item>
                 </el-dropdown-menu>
               </el-dropdown>
             </template>
           </el-table-column>
         </el-table>
-        <el-pagination
-          small
-          layout="prev, pager, next"
-          :hide-on-single-page="true"
-          :total="5">
-        </el-pagination>
       </div>
     </el-aside>
     <div class="cb-container">
@@ -328,23 +337,13 @@ export default {
         },
 
         //
-        // onCourseworkXXX
+        // Coursework functions
         //
-        onCourseworkCreated: function (success, data) {
-            if ( success ) {
-                data.dirty = false
-                data.state = 0
-                this.courseworkData.push( data )
-                this.handleCourseworkSelect( data )
-            }
-        },
-        onCourseworkRemoved: function ( success ) {
-            if ( success && this.currentCoursework ) {
+        removeCoursework ( coursework ) {
+            if ( coursework ) {
                 for ( let index = 0; index < this.courseworkData.length; index ++ )
-                    if ( this.courseworkData[ index ] === this.currentCoursework ) {
-                        this.currentCoursework = undefined
-                        this.courseworkData.pop( index )
-
+                    if ( this.courseworkData[ index ].id === coursework.id ) {
+                        this.courseworkData.splice( index, 1 )
                         if ( ! this.courseworkData.length )
                             this.handleCourseworkSelect( undefined )
                         else if ( index < this.courseworkData.length )
@@ -353,6 +352,19 @@ export default {
                             this.handleCourseworkSelect( this.courseworkData[ index - 1 ] )
                         break
                     }
+                this.$refs.editor.handleCourseworkClose( coursework )
+            }
+        },
+
+        //
+        // onCourseworkXXX
+        //
+        onCourseworkCreated: function (success, data) {
+            if ( success ) {
+                data.dirty = false
+                data.state = 0
+                this.courseworkData.push( data )
+                this.handleCourseworkSelect( data )
             }
         },
 
@@ -399,9 +411,20 @@ export default {
         },
         handleCourseworkRemove: function ( coursework ) {
             if ( coursework ) {
-                connector.$once( 'api-remove-coursework', this.onCoursewrokRemoved )
-                connector.removeCoursework( coursework )
-                 this.$refs.editor.handleCourseworkClose( coursework )
+                this.$confirm('确认删除文件: ' + coursework.name + '?', '确认', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning',
+                    callback: (action) => {
+                        if (action === 'confirm') {
+                            connector.$once( 'api-remove-coursework', success => {
+                                if ( success )
+                                    this.removeCoursework( coursework )
+                            } )
+                            connector.removeCoursework( coursework )
+                        }
+                    }
+                })
             }
         },
         handleCourseworkBuild: function ( coursework ) {
@@ -410,6 +433,24 @@ export default {
                 connector.buildCoursework( coursework )
                 this.$emit( 'coder-build', coursework )
             }
+        },
+        handleCourseworkCommand: function ( command ) {
+            if ( command.action === 'rename' )
+                this.handleCourseworkRename( command.coursework )
+            else if ( command.action === 'delete' )
+                this.handleCourseworkRemove( command.coursework )
+            else if ( command.action === 'download' )
+                this.handleCourseworkDownload( command.coursework )
+            else if ( command.action === 'wrapmode' )
+                this.handleWrapModeToggle( command.coursework )
+            else if ( command.action === 'options' )
+                this.handleBufferSetting( command.coursework )
+        },
+        handleWrapModeToggle: function ( coursework ) {
+            this.$refs.editor.handleCourseworkSetting( coursework )
+        },
+        handleBufferSetting: function ( coursework ) {
+            this.$refs.editor.handleCourseworkSetting( coursework )
         },
 
         //
@@ -427,10 +468,10 @@ export default {
             }
             reader.readAsText(file)
         },
-        handleUploadFile: function () {
+        handleCourseworkUpload: function () {
             this.$el.querySelector('input[type="file"]').click()
         },
-        handleDownloadFile: function ( coursework ) {
+        handleCourseworkDownload: function ( coursework ) {
             let buf = this.$refs.editor.getBuffer( coursework )
             let text = buf && buf.session.getValue()
             if (text && text.length) {
@@ -454,9 +495,6 @@ export default {
 <style>
 /* Color themem */
 .cb-coder .cb-card .el-input__inner,
-.cb-coder .cb-card .el-pagination,
-.cb-coder .cb-card .el-pagination li,
-.cb-coder .cb-card .el-pagination button,
 .cb-coder .cb-card .el-table,
 .cb-coder .cb-card .el-table * {
     background-color: inherit;
@@ -512,10 +550,6 @@ export default {
     margin-bottom: 9px;
 }
 
-.cb-coder .cb-card > *:last-child {
-    margin-bottom: 9px;
-}
-
 .cb-coder .cb-card .el-table td {
     padding: 6px 0;
     cursor: pointer;
@@ -528,11 +562,6 @@ export default {
 
 .cb-coder .cb-card .el-table .is-right > .cell {
     padding: 0 6px;
-}
-
-.cb-coder .cb-card .el-pagination {
-    text-align: center;
-    margin-top: 16px;
 }
 
 .cb-red-dot::after {

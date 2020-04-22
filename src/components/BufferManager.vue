@@ -119,9 +119,12 @@ export default {
             let buffers = coursework ? this.bufferList : [ this.getBuffer( coursework ) ]
             buffers.forEach( buf => {
                 if ( buf && buf.coursework.dirty ) {
-                    connector.$once('api-update-coursework-content', function ( success ) {
-                        if ( success )
+                    connector.$once('api-update-coursework-content', function ( success, data ) {
+                        if ( success ) {
+                            if ( buf.coursework.name !== data.name )
+                                data.name = buf.coursework.name
                             buf.coursework.dirty = false
+                        }
                     } )
                     connector.updateCourseworkContent( buf.coursework, buf.session.getValue() )
                 }
