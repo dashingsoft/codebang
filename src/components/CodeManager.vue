@@ -272,6 +272,11 @@ export default {
         // handleCourseXXX
         //
         handleCourseAdd: function () {
+            if ( ! connector.isAuthenticated ) {
+                this.$message( '未登录用户不能创建课程' )
+                return
+            }
+
             this.$prompt('请输入课程名称', '创建课程', {
                 inputValue: '第一节课',
                 confirmButtonText: '确定',
@@ -350,6 +355,11 @@ export default {
         //
         // Coursework functions
         //
+        addCoursework( name ) {
+            connector.$once('api-new-coursework', this.onCourseworkCreated)
+            let content = '/* CodeBang Course: ' + name + '*/'
+            connector.newCoursework(name, content, this.currentCourse)
+        },
         removeCoursework ( coursework ) {
             if ( coursework ) {
                 for ( let index = 0; index < this.courseworkData.length; index ++ )
@@ -392,12 +402,17 @@ export default {
                 inputValue: 'foo.c',
                 confirmButtonText: '确定',
                 cancelButtonText: '取消',
-                callback: (action, instance) => {
-                    if (action === 'confirm') {
-                        connector.$once('api-new-coursework', this.onCourseworkCreated)
-                        let name = instance.inputValue
-                        let content = '/* CodeBang Course: ' + name + '*/'
-                        connector.newCoursework(name, content, this.currentCourse)
+                callback: ( action, instance ) => {
+                    if ( action === 'confirm' && instance.inputValue ) {
+                        this.addCoursework( instance.inputValue )
+                        if ( this.currentCourse === undefined )
+                            this.$message( {
+                                type: 'info',
+                                message: '注意：当前没有课程被选中，所以增加的文件都是临时文件，' +
+                                         '当前页面一旦被关闭之后就无法在找回',
+                                showClose: true,
+                                duration: 6000
+                            } )
                     }
                 }
             })
