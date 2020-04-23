@@ -1,5 +1,6 @@
 <template>
-  <div class="cb-launcher cb-container">
+  <div class="cb-launcher">
+    This is CodeBang Lanucher.
   </div>
 </template>
 

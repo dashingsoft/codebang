@@ -69,7 +69,7 @@
           <el-table-column
             fixed="right"
             align="right"
-            width="80">
+            width="100">
             <template v-slot:header>
               <el-button
                 title="新增文件"
@@ -160,13 +160,14 @@ export default {
     data() {
         return {
             courseIndex: undefined,
+            currentCourse: undefined,
             courseData: undefined,
             matchedCourses: [],
             currentCoursework: undefined,
             courseworkData: [],
+            tempCourseworks: [],
             loadingCourse: false,
-            dirtyFlag: false,
-            cachedData: {},
+            cachedData: { 'pk_0': [] },
         }
     },
     mounted() {
@@ -178,12 +179,15 @@ export default {
     methods: {
         clearData() {
             this.courseIndex = undefined
+            this.currentCourse = undefined
             this.courseData = undefined
             this.matchedCourses = []
             this.currentCoursework = null
             this.courseworkData = []
             this.loadingCourse = false
-            this.cachedData = {}
+            this.cachedData = {
+                'pk_0': this.cachedData[ 'pk_0' ]
+            }
         },
         refreshData() {
             this.clearData()
@@ -319,7 +323,9 @@ export default {
         },
         handleCourseChange: function ( index ) {
             let prefix = 'pk_'
-            if ( this.currentCourse && this.courseworkData && this.courseworkData.length )
+            if ( this.currentCourse === undefined )
+                this.cachedData[ prefix + '0'] = this.courseworkData
+            else if ( this.currentCourse && this.courseworkData && this.courseworkData.length )
                 this.cachedData[ prefix + this.currentCourse.id ] = this.courseworkData
 
             this.courseIndex = index
@@ -329,7 +335,7 @@ export default {
             this.$refs.editor.handleCourseworkSelect()
 
             if ( this.currentCourse === undefined )
-                this.courseworkData = []
+                this.courseworkData = this.cachedData[ prefix + '0' ]
 
             else {
                 let key = prefix + this.currentCourse.id
@@ -549,16 +555,19 @@ export default {
     border: 1px solid #666;
 }
 
-.cb-coder .cb-card .el-table td,
+.cb-coder .cb-card .el-table td {
+    border-bottom: 0;
+}
+
 .cb-coder .cb-card .el-table th.is-leaf {
     border-bottom: 1px solid #666;
 }
 
 .cb-coder .cb-card .el-table .el-table__body tr > td:first-child {
-    /* border-left: 1px solid #666; */
+    border-left: 1px solid #666;
 }
 .cb-coder .cb-card .el-table .el-table__body tr > td:last-child {
-    /* border-right: 1px solid #666; */
+    border-right: 1px solid #666;
 }
 
 /* Status */

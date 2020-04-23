@@ -14,13 +14,13 @@
         </el-input>
       </div>
       <el-button
-        @click="activePage=0"
+        @click="pageIndex=0"
         type="text">代码</el-button>
       <el-button
-        @click="activePage=1"
+        @click="pageIndex=1"
         type="text">编译</el-button>
       <el-button
-        @click="activePage=2"
+        @click="pageIndex=2"
         type="text">运行</el-button>
       <div class="cb-title">
         {{ title }}
@@ -50,16 +50,18 @@
       </div>
     </div>
     <div class="cb-main">
-      <div class="cb-container" v-show="activePage==0">
+      <div class="cb-container" v-show="pageIndex==0">
         <cb-code-manager
           v-on:title-changed="resetTitle"
           ref="coder"></cb-code-manager>
       </div>
-      <div class="cb-container" v-show="activePage==1">
-        <!-- <cb-builder></cb-builder> -->
+      <div class="cb-container" v-show="pageIndex==1">
+        <cb-build-manager
+          ref="builder"></cb-build-manager>
       </div>
-      <div class="cb-container" v-show="activePage==2">
-        <!-- <cb-runner></cb-runner> -->
+      <div class="cb-container" v-show="pageIndex==2">
+        <cb-lanuch-manager
+          ref="launcher"></cb-lanuch-manager>
       </div>
     </div>
   </div>
@@ -75,8 +77,7 @@ export default {
             title: '',
             logonName: '',
             isAuthenticated: false,
-            activePage: 0,
-            editor: null
+            pageIndex: 0,
         }
     },
     mounted() {

@@ -2,7 +2,7 @@ import Vue from 'vue'
 import App from './App.vue'
 import CodeManager from './components/CodeManager.vue'
 import BufferManager from './components/BufferManager.vue'
-import BuildManager from './components/BufferManager.vue'
+import BuildManager from './components/BuildManager.vue'
 import LaunchManager from './components/LaunchManager.vue'
 
 import './plugins/element.js'

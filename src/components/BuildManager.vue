@@ -1,5 +1,6 @@
 <template>
-  <div class="cb-builder cb-container">
+    <div class="cb-builder">
+    This is builder for CodeBang
   </div>
 </template>
 
