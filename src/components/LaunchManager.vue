@@ -9,6 +9,9 @@ import connector from '../connector.js'
 
 export default {
     name: 'LaunchManager',
+    props: {
+        coursework: Object,
+    },
     data() {
         return {
             editor: null

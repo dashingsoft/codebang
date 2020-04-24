@@ -61,7 +61,8 @@
             label="课程文件">
             <template v-slot="scope">
               <span
-                v-bind:class="{ 'cb-red-dot': courseworkData[scope.$index].dirty }">
+                v-bind:class="{ 'cb-red-dot': isDirty( scope.row.state ),
+                                'cb-tag-warning': isBuildFailed( scope.row.state ) }">
                 {{ scope.row.name }}
               </span>
             </template>
@@ -88,12 +89,28 @@
             </template>
             <template v-slot:default="scope">
               <el-button
-                title="编译和运行"
+                title="保存"
                 type="primary"
                 size="mini"
                 plain
+                v-show="isDirty( scope.row.state )"
+                icon="el-icon-document-copy"
+                @click="handleCourseworkSave( scope.row )"></el-button>
+              <el-button
+                title="编译并且运行"
+                type="primary"
+                size="mini"
+                plain
+                v-show="isBuildEnabled( scope.row.state )"
                 icon="el-icon-position"
                 @click="handleCourseworkBuild( scope.row )"></el-button>
+              <el-button
+                title="正在编译中"
+                type="primary"
+                size="mini"
+                plain
+                v-show="isBuilding( scope.row.state )"
+                icon="el-icon-loading"></el-button>
               <el-dropdown
                 trigger="hover"
                 size="mini"
@@ -140,6 +157,7 @@
 </template>
 
 <script>
+import { DIRTY, COMPILED, FAILURE, TIMEOUT, BUILDING } from '../definition.js'
 import connector from '../connector.js'
 
 export default {
@@ -201,7 +219,22 @@ export default {
             connector.$once('api-list-course-items', this.onListCourseItems)
             connector.listCourseItems(course)
         },
+        isDirty( state ) {
+            return  state === DIRTY
+        },
+        isBuildFailed( state ) {
+            return state === FAILURE || state === TIMEOUT
+        },
+        isBuilding( state ) {
+            return state === BUILDING
+        },
+        isBuildEnabled( state ) {
+            return [ 0, COMPILED, FAILURE, TIMEOUT ].indexOf( state ) > -1
+        },
 
+        //
+        // Common onXXX
+        //
         onLogin: function (success) {
             if (success)
                 this.refreshData()
@@ -231,7 +264,6 @@ export default {
         onListCourseItems: function (success, data) {
             if (success) {
                 data.forEach( item => {
-                    item.dirty = false
                     item.state = 0
                 } )
                 this.courseworkData = data
@@ -382,7 +414,6 @@ export default {
         //
         onCourseworkCreated: function (success, data) {
             if ( success ) {
-                data.dirty = false
                 data.state = 0
                 this.courseworkData.push( data )
                 this.handleCourseworkSelect( data )
@@ -395,6 +426,7 @@ export default {
         handleCourseworkSelect: function ( coursework ) {
             this.currentCoursework = coursework
             this.$refs.editor.handleCourseworkSelect( coursework )
+            this.$emit( 'changed', coursework )
             this.$emit( 'title-changed', this.title )
         },
         handleCourseworkAdd: function () {
@@ -429,7 +461,7 @@ export default {
                     callback: (action, instance) => {
                         if (action === 'confirm') {
                             coursework.name = instance.inputValue
-                            coursework.dirty = true
+                            coursework.state = DIRTY
                             this.$refs.editor.handleCourseworkSave( coursework )
                         }
                     }
@@ -454,11 +486,15 @@ export default {
                 })
             }
         },
-        handleCourseworkBuild: function ( coursework ) {
-            if ( coursework ) {
-                // connector.$once('api-build-coursework', this.onBuildCoursewrok)
+        handlecourseworkbuild: function ( coursework ) {
+            if ( coursework && coursework.state === COMPILED )
+                this.pageIndex = 2
+            else if ( coursework ) {
+                connector.$once( 'api-build-coursework', success => {
+                    if ( ! success )
+                        this.$message( '编译出错了' )
+                } )
                 connector.buildCoursework( coursework )
-                this.$emit( 'coder-build', coursework )
             }
         },
         handleCourseworkCommand: function ( command ) {
@@ -588,6 +624,16 @@ export default {
 /* Status */
 .cb-red-dot::after {
     background-color: rgba(245, 110, 110, 0.3);
+    content: '';
+    height: 9px;
+    width: 9px;
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    border-radius: 50%;
+}
+.cb-tag-warning::after {
+    background-color: rgba(227, 162, 195, 0.3);
     content: '';
     height: 9px;
     width: 9px;

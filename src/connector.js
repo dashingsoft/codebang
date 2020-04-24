@@ -1,5 +1,8 @@
+import { COMPILED, FAILURE, TIMEOUT, BUILDING } from './definition.js'
+
 import Vue from 'vue'
 import reqwest from './reqwest.js'
+
 
 const serverUrl = 'http://localhost:9092'
 
@@ -316,12 +319,83 @@ export default new Vue({
             this.sendRequest(api, make_multipart_data(args, files), 'api-update-coursework-content')
         },
         buildCoursework: function (coursework) {
-            const api = '/api/courseworks/' + coursework.id + '/build/'
-            this.sendRequest(api, { data: coursework }, 'api-build-coursework')
+            let timeout = 15000
+            const loading = this.$loading( {
+                lock: true,
+                text: '正在编译 ' + coursework.name + ' ...',
+                spinner: 'el-icon-loading',
+                background: 'rgba(0, 0, 0, 0.7)'
+            } )
+
+            const retry = function ( coursework ) {
+                this.$once( 'api-build', ( success, data ) => {
+
+                    let result = false
+                    if ( success ) {
+                        if ( data.state === 'SUCCESS' ) {
+                            loading.close()
+                            coursework.state = COMPILED
+                            result = true
+                        }
+                        else if ( data.state === 'FAILURE' ) {
+                            loading.close()
+                            coursework.state = FAILURE
+                        }
+                        else if ( timeout < 0 ) {
+                            loading.close()
+                            coursework.state = TIMEOUT
+                        }
+                        else {
+                            timeout -= 3000
+                            window.setTimeout( retry, 3000, coursework )
+                            result = null
+                        }
+                    }
+                    else
+                        loading.close()
+
+                    if ( result !== null )
+                        this.$emit( 'api-build-coursework', result )
+                } )
+
+                const api = '/api/courseworks/' + coursework.id + '/build/'
+                this.sendRequest(api, { data: coursework }, 'api-build')
+
+            }.bind( this )
+
+            this.$once( 'api-rebuild', ( success, data ) => {
+
+                let result = false
+                if ( success ) {
+                    if ( data.state === 'SUCCESS' ) {
+                        loading.close()
+                        coursework.state = COMPILED
+                        result = true
+                    }
+                    else if ( data.state === 'FAILURE' ) {
+                        loading.close()
+                        coursework.state = FAILURE
+                    }
+                    else {
+                        retry( coursework )
+                        result = null
+                    }
+                }
+                else
+                    loading.close()
+
+                if ( result !== null )
+                    this.$emit( 'api-build-coursework', result )
+
+            } ).bind( this )
+
+            coursework.state = BUILDING
+            const api = '/api/courseworks/' + coursework.id + '/rebuild/'
+            this.sendRequest(api, { data: coursework }, 'api-rebuild')
         },
         taskCoursework: function (coursework) {
-            const api = '/api/courseworks/' + coursework.id + '/task/'
-            this.sendRequest(api, { data: coursework }, 'api-task-coursework')
+            const api = '/api/courseworks/' + coursework.id + '/result/'
+            this.sendRequest(api, { data: coursework }, 'api-task')
         },
     }
 })

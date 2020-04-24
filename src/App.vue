@@ -53,14 +53,17 @@
       <div class="cb-container" v-show="pageIndex==0">
         <cb-code-manager
           v-on:title-changed="resetTitle"
+          v-on:changed="resetCoursework"
           ref="coder"></cb-code-manager>
       </div>
       <div class="cb-container" v-show="pageIndex==1">
         <cb-build-manager
+          coursework="coursework"
           ref="builder"></cb-build-manager>
       </div>
       <div class="cb-container" v-show="pageIndex==2">
         <cb-lanuch-manager
+          coursework="coursework"
           ref="launcher"></cb-lanuch-manager>
       </div>
     </div>
@@ -78,6 +81,7 @@ export default {
             logonName: '',
             isAuthenticated: false,
             pageIndex: 0,
+            coursework: undefined
         }
     },
     mounted() {
@@ -103,6 +107,9 @@ export default {
     methods: {
         resetTitle( title ) {
             this.title = title
+        },
+        resetCoursework( coursework ) {
+            this.coursework = coursework
         },
         resizeEditor() {
             // var navbar = document.querySelector('.cb-navbar')

@@ -88,7 +88,7 @@ export default {
                             session.setMode( this.mode )
                             session.setUseWrapMode(this.wrapMode)
                             session.on( 'change', () => {
-                                buf.coursework.dirty = true
+                                buf.coursework.state = -1
                             } )
                             this.bufferList.push( buf )
                             this.selectBuffer( buf )
@@ -119,12 +119,12 @@ export default {
         handleCourseworkSave: function ( coursework ) {
             let buffers = coursework ? this.bufferList : [ this.getBuffer( coursework ) ]
             buffers.forEach( buf => {
-                if ( buf && buf.coursework.dirty ) {
+                if ( buf && ( buf.coursework.state === -1 ) ) {
                     connector.$once('api-update-coursework-content', function ( success, data ) {
                         if ( success ) {
                             if ( buf.coursework.name !== data.name )
                                 data.name = buf.coursework.name
-                            buf.coursework.dirty = false
+                            buf.coursework.state = 0
                         }
                     } )
                     connector.updateCourseworkContent( buf.coursework, buf.session.getValue() )

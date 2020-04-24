@@ -9,6 +9,9 @@ import connector from '../connector.js'
 
 export default {
     name: 'BuildManager',
+    props: {
+        coursework: Object,
+    },
     data() {
         return {
             editor: null
