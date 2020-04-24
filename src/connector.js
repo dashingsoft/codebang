@@ -1,7 +1,7 @@
 import { COMPILED, FAILURE, TIMEOUT, BUILDING } from './definition.js'
 
 import Vue from 'vue'
-import reqwest from './reqwest.js'
+import reqwest from './plugins/reqwest.js'
 
 
 const serverUrl = 'http://localhost:9092'

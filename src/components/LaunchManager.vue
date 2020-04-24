@@ -1,6 +1,8 @@
 <template>
   <div class="cb-launcher">
     This is CodeBang Lanucher.
+    <el-button
+      @click="testCode"> Test</el-button>
   </div>
 </template>
 
@@ -25,14 +27,14 @@ export default {
         } )
     },
     methods: {
-        handleNewFile: function () {
-            this.editor.setValue(
-                '#include <stdio.h>\n\nint main(int argc, char *argv[])\n' +
-                    '{\n    printf("Hello World\\n");\n    return 0;\n}')
-            this.editor.selection.clearSelection()
-            this.editor.gotoLine(1);
-            this.editor.focus()
-        }
+        runCodeWithArguments ( obj, args ) {
+            return Function( '"use strict"; return (' + obj + ')' )()( args )
+        },
+        testCode () {
+            const code = 'function ( arg ) { return "abc" + arg }'
+            let result = this.runCodeWithArguments( code, "efg" )
+            this.$message( 'Get result: ' + result )
+        },
     }
 }
 </script>
