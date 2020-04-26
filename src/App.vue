@@ -7,7 +7,7 @@
       </div>
       <div class="cb-searchbox" style="display: none;">
         <el-input
-          placeholder="$t( 'Please input search text' )"
+          :placeholder="$t( 'Please input search text' )"
           prefix-icon="el-icon-search"
           size="mini"
           clearable>

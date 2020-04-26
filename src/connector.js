@@ -2,7 +2,7 @@ import { COMPILED, FAILURE, TIMEOUT, BUILDING } from './definition.js'
 
 import Vue from 'vue'
 import reqwest from './plugins/reqwest.js'
-
+import { _t } from './plugins/gettext.js'
 
 const serverUrl = 'http://localhost:9092'
 
@@ -44,7 +44,7 @@ const set_key = function (key, value) {
     catch (e) {
         Vue.prototype.$message( {
             type: 'warning',
-            message: '当前浏览器无法保存登陆信息，关闭页面之后登陆信息会丢失',
+            message: _t( '当前浏览器无法保存登陆信息，关闭页面之后登陆信息会丢失' ),
             showClose: true,
             duration: 0
         } )
@@ -64,11 +64,11 @@ const error_callback = function (req, msg, err) {
         status: req.status,
         statusText: req.statusText,
         message: msg ? msg :
-            req.status === 0 ? '无法发送请求到服务器' :
+            req.status === 0 ? _t( '无法发送请求到服务器' ) :
             hasOwnProperty(response, 'error') ?  response.error :
             hasOwnProperty(response, 'detail') ? response.detail :
             hasOwnProperty(err, 'message') ? err.message :
-            '发送请求到服务器发生了未知错误'
+            _t( '发送请求到服务器发生了未知错误' )
     } )
 }
 
@@ -322,7 +322,7 @@ export default new Vue({
             let timeout = 15000
             const loading = this.$loading( {
                 lock: true,
-                text: '正在编译 ' + coursework.name + ' ...',
+                text: _t( '正在编译 ' ) + coursework.name + ' ...',
                 spinner: 'el-icon-loading',
                 background: 'rgba(0, 0, 0, 0.7)'
             } )

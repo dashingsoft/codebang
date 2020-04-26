@@ -19,6 +19,7 @@ let locales = [
         "Sign in": "登陆",
         "Sign out": "注销",
         "Settings": "设置",
+        "Change course title": "修改课程名称",
     }
 ]
 

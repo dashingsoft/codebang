@@ -4,27 +4,27 @@
     <el-aside>
       <div class="cb-card">
         <div class="cb-navbar">
-          <span>课程管理</span>
+          <span>{{ $t( '课程管理' ) }}</span>
           <div class="cb-toolbox">
             <el-button
-              title="删除当前课程和相关的课程文件"
+              :title="$t( '删除当前课程和相关的课程文件' )"
               type="text"
               :disabled="!currentCourse"
               icon="el-icon-delete"
               @click="handleCourseRemove"></el-button>
             <el-button
-              title="修改课程名称"
+              :title="$t( 'Change course title' )"
               type="text"
               :disabled="!currentCourse"
               icon="el-icon-edit"
               @click="handleCourseRename"></el-button>
             <el-button
-              title="刷新"
+              :title="$t( '刷新' )"
               type="text"
               icon="el-icon-refresh-right"
               @click="handleCourseRefresh"></el-button>
             <el-button
-              title="新增课程"
+              :title="$t( '新增课程' )"
               type="text"
               icon="el-icon-document-add"
               @click="handleCourseAdd"></el-button>
@@ -41,7 +41,7 @@
           remote
           :remote-method="onFilterCourse"
           :loading="loadingCourse"
-          placeholder="请选择课程">
+          :placeholder="$t( '请选择课程' )">
           <el-option
             v-for="(item, index) in matchedCourses"
             :key="item.id"
@@ -51,14 +51,13 @@
         </el-select>
         <el-table
           :data="courseworkData"
-          empty-text="没有内容"
           size="small"
           highlight-current-row
           @current-change="handleCourseworkSelect">
           <el-table-column
             property="name"
             sortable
-            label="课程文件">
+            :label="$t( '课程文件' )">
             <template v-slot="scope">
               <span
                 v-bind:class="{ 'cb-red-dot': isDirty( scope.row.state ),
@@ -73,14 +72,14 @@
             width="100">
             <template v-slot:header>
               <el-button
-                title="新增文件"
+                :title="$t( '新增文件' )"
                 type="primary"
                 plain
                 size="mini"
                 icon="el-icon-plus"
                 @click="handleCourseworkAdd"></el-button>
               <el-button
-                title="保存文件"
+                :title="$t( '保存文件' )"
                 type="primary"
                 plain
                 size="mini"
@@ -89,7 +88,7 @@
             </template>
             <template v-slot:default="scope">
               <el-button
-                title="保存"
+                :title="$t( '保存' )"
                 type="primary"
                 size="mini"
                 plain
@@ -97,7 +96,7 @@
                 icon="el-icon-document-copy"
                 @click="handleCourseworkSave( scope.row )"></el-button>
               <el-button
-                title="编译并且运行"
+                :title="$t( '编译并且运行' ) "
                 type="primary"
                 size="mini"
                 plain
@@ -105,7 +104,7 @@
                 icon="el-icon-position"
                 @click="handleCourseworkBuild( scope.row )"></el-button>
               <el-button
-                title="正在编译中"
+                :title="$t( '正在编译中' )"
                 type="primary"
                 size="mini"
                 plain
@@ -124,24 +123,24 @@
                 <el-dropdown-menu slot="dropdown">
                   <el-dropdown-item
                     :command="{ action: 'rename', coursework: scope.row }">
-                    更改名称
+                    {{ $t( '更改名称' ) }}
                   </el-dropdown-item>
                   <el-dropdown-item
                     :command="{ action: 'delete', coursework: scope.row }">
-                    删除
+                    {{ $t( '删除' ) }}
                   </el-dropdown-item>
                   <el-dropdown-item
                     :command="{ action: 'download', coursework: scope.row }">
-                    下载
+                    {{ $t( '下载' ) }}
                   </el-dropdown-item>
                   <el-dropdown-item
                     divided
                     :command="{ action: 'wrapmode', coursework: scope.row }">
-                    切换折行模式
+                    {{ $t( '切换折行模式' ) }}
                   </el-dropdown-item>
                   <el-dropdown-item
                     :command="{ action: 'options', coursework: scope.row }">
-                    选项设置
+                    {{ $t( '选项设置' ) }}
                   </el-dropdown-item>
                 </el-dropdown-menu>
               </el-dropdown>
@@ -159,6 +158,7 @@
 <script>
 import { DIRTY, COMPILED, FAILURE, TIMEOUT, BUILDING } from '../definition.js'
 import connector from '../connector.js'
+import { _t } from '../plugins/gettext.js'
 
 export default {
     name: 'CodeManager',
@@ -305,14 +305,12 @@ export default {
         //
         handleCourseAdd: function () {
             if ( ! connector.isAuthenticated ) {
-                this.$message( '未登录用户不能创建课程' )
+                this.$message( _t( '未登录用户不能创建课程' ) )
                 return
             }
 
-            this.$prompt('请输入课程名称', '创建课程', {
-                inputValue: '第一节课',
-                confirmButtonText: '确定',
-                cancelButtonText: '取消',
+            this.$prompt( _t( '请输入课程名称' ), _t( '创建课程' ), {
+                inputValue: _t( '第一节课' ),
                 callback: (action, instance) => {
                     if (action === 'confirm') {
                         connector.$once('api-new-course', this.onCourseCreated)
@@ -323,10 +321,8 @@ export default {
         },
         handleCourseRename: function () {
             if (this.currentCourse) {
-                this.$prompt('请输入课程的新名称', '修改课程', {
+                this.$prompt( _t( '请输入课程的新名称' ), _t( '修改课程' ), {
                     inputValue: this.currentCourse.title,
-                    confirmButtonText: '确定',
-                    cancelButtonText: '取消',
                     callback: (action, instance) => {
                         if (action === 'confirm') {
                             connector.$once('api-update-course', this.onCourseRenamed)
@@ -341,9 +337,7 @@ export default {
         },
         handleCourseRemove: function () {
             if (this.currentCourse) {
-                this.$confirm('确认删除课程: ' + this.currentCourse.title + '?', '确认', {
-                    confirmButtonText: '确定',
-                    cancelButtonText: '取消',
+                this.$confirm( _t( '确认删除课程: %1 ?', this.currentCourse.title ), _t( '确认' ), {
                     type: 'warning',
                     callback: (action) => {
                         if (action === 'confirm') {
@@ -430,18 +424,16 @@ export default {
             this.$emit( 'title-changed', this.title )
         },
         handleCourseworkAdd: function () {
-            this.$prompt('请输入文件名称', '创建代码文件', {
+            this.$prompt( _t( '请输入文件名称' ), _t( '创建代码文件' ), {
                 inputValue: 'foo.c',
-                confirmButtonText: '确定',
-                cancelButtonText: '取消',
                 callback: ( action, instance ) => {
                     if ( action === 'confirm' && instance.inputValue ) {
                         this.addCoursework( instance.inputValue )
                         if ( this.currentCourse === undefined )
                             this.$message( {
                                 type: 'info',
-                                message: '注意：当前没有课程被选中，所以增加的文件都是临时文件，' +
-                                         '当前页面一旦被关闭之后就无法在找回',
+                                message: _t( '注意：当前没有课程被选中，所以增加的文件都是临时文件，' +
+                                             '当前页面一旦被关闭之后就无法在找回' ),
                                 showClose: true,
                                 duration: 6000
                             } )
@@ -454,10 +446,8 @@ export default {
         },
         handleCourseworkRename: function ( coursework ) {
             if ( coursework ) {
-                this.$prompt('请输入文件的新名称', '修改文件名称', {
+                this.$prompt( _t( '请输入文件的新名称' ), _t( '修改文件名称' ), {
                     inputValue: coursework.name,
-                    confirmButtonText: '确定',
-                    cancelButtonText: '取消',
                     callback: (action, instance) => {
                         if (action === 'confirm') {
                             coursework.name = instance.inputValue
@@ -470,9 +460,7 @@ export default {
         },
         handleCourseworkRemove: function ( coursework ) {
             if ( coursework ) {
-                this.$confirm('确认删除文件: ' + coursework.name + '?', '确认', {
-                    confirmButtonText: '确定',
-                    cancelButtonText: '取消',
+                this.$confirm( _t( '确认删除文件: %1 ?', coursework.name ), _t( '确认' ), {
                     type: 'warning',
                     callback: (action) => {
                         if (action === 'confirm') {
@@ -492,7 +480,7 @@ export default {
             else if ( coursework ) {
                 connector.$once( 'api-build-coursework', success => {
                     if ( ! success )
-                        this.$message( '编译出错了' )
+                        this.$message( _t( '编译出错了' ) )
                 } )
                 connector.buildCoursework( coursework )
             }
