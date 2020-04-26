@@ -3,11 +3,11 @@
     <div class="cb-navbar cb-header">
       <div class="cb-brand">
         <img src="./assets/logo.png">
-        <span>CodeBang</span>
+        <span>{{ $t( 'CodeBang' ) }} </span>
       </div>
       <div class="cb-searchbox" style="display: none;">
         <el-input
-          placeholder="请输入搜素内容"
+          placeholder="$t( 'Please input search text' )"
           prefix-icon="el-icon-search"
           size="mini"
           clearable>
@@ -15,13 +15,13 @@
       </div>
       <el-button
         @click="pageIndex=0"
-        type="text">代码</el-button>
+        type="text">{{ $t( 'Code' ) }}</el-button>
       <el-button
         @click="pageIndex=1"
-        type="text">编译</el-button>
+        type="text">{{ $t( 'Build' ) }}</el-button>
       <el-button
         @click="pageIndex=2"
-        type="text">运行</el-button>
+        type="text">{{ $t( 'Launch' ) }}</el-button>
       <div class="cb-title">
         {{ title }}
       </div>
@@ -38,13 +38,13 @@
           </el-button>
           <el-dropdown-menu slot="dropdown">
             <template v-if="isAuthenticated">
-              <el-dropdown-item disabled>登陆为 {{ logonName }}</el-dropdown-item>
-              <el-dropdown-item command="logout" divided>注销</el-dropdown-item>
+              <el-dropdown-item disabled>{{ $t( 'Signed in as %1', logonName ) }}</el-dropdown-item>
+              <el-dropdown-item command="logout" divided>{{ $t( 'Sign out' ) }}</el-dropdown-item>
             </template>
             <template v-else>
-              <el-dropdown-item command="login">登陆</el-dropdown-item>
+              <el-dropdown-item command="login">{{ $t( 'Sign in' ) }}</el-dropdown-item>
             </template>
-            <el-dropdown-item command="profile" divided>偏好设置</el-dropdown-item>
+            <el-dropdown-item command="profile" divided>{{ $t( 'Settings' ) }}</el-dropdown-item>
           </el-dropdown-menu>
         </el-dropdown>
       </div>
@@ -58,12 +58,12 @@
       </div>
       <div class="cb-container" v-show="pageIndex==1">
         <cb-build-manager
-          coursework="coursework"
+          :coursework="coursework"
           ref="builder"></cb-build-manager>
       </div>
       <div class="cb-container" v-show="pageIndex==2">
         <cb-lanuch-manager
-          coursework="coursework"
+          :coursework="coursework"
           ref="launcher"></cb-lanuch-manager>
       </div>
     </div>

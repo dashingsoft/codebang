@@ -40,4 +40,6 @@ export default {
 </script>
 
 <style>
+.cb-launcher {
+}
 </style>

@@ -7,6 +7,8 @@ vue create .
 npm install
 npm install -S vce-builds
 npm install -S pixi.js
+
+npm install -S gettext.js
 ```
 
 ### Import element-ui
@@ -34,3 +36,7 @@ npm run lint
 
 ### Customize configuration
 See [Configuration Reference](https://cli.vuejs.org/config/).
+
+### International
+
+See [gettext.js](https://github.com/guillaumepotier/gettext.js/)

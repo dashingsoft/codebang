@@ -5,6 +5,9 @@ import BufferManager from './components/BufferManager.vue'
 import BuildManager from './components/BuildManager.vue'
 import LaunchManager from './components/LaunchManager.vue'
 
+import I18nPlugin from './plugins/gettext.js'
+Vue.use(I18nPlugin)
+
 import './plugins/element.js'
 
 Vue.config.productionTip = false
