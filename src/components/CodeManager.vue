@@ -13,7 +13,7 @@
               icon="el-icon-delete"
               @click="handleCourseRemove"></el-button>
             <el-button
-              :title="$t( 'Change course title' )"
+              :title="$t( '修改课程标题' )"
               type="text"
               :disabled="!currentCourse"
               icon="el-icon-edit"
@@ -309,7 +309,7 @@ export default {
                 return
             }
 
-            this.$prompt( _t( '请输入课程名称' ), _t( '创建课程' ), {
+            this.$prompt( _t( '请输入课程名称' ), {
                 inputValue: _t( '第一节课' ),
                 callback: (action, instance) => {
                     if (action === 'confirm') {
@@ -321,7 +321,7 @@ export default {
         },
         handleCourseRename: function () {
             if (this.currentCourse) {
-                this.$prompt( _t( '请输入课程的新名称' ), _t( '修改课程' ), {
+                this.$prompt( _t( '请输入课程的新名称' ), {
                     inputValue: this.currentCourse.title,
                     callback: (action, instance) => {
                         if (action === 'confirm') {
@@ -337,7 +337,7 @@ export default {
         },
         handleCourseRemove: function () {
             if (this.currentCourse) {
-                this.$confirm( _t( '确认删除课程: %1 ?', this.currentCourse.title ), _t( '确认对话框' ), {
+                this.$confirm( _t( '确认删除课程 %1 吗?', this.currentCourse.title ), {
                     type: 'warning',
                     callback: (action) => {
                         if (action === 'confirm') {
@@ -345,7 +345,7 @@ export default {
                             connector.removeCourse(this.currentCourse)
                         }
                     }
-                })
+                } )
             }
         },
         handleCourseRefresh: function () {
@@ -424,29 +424,26 @@ export default {
             this.$emit( 'title-changed', this.title )
         },
         handleCourseworkAdd: function () {
-            this.$prompt( _t( '请输入文件名称' ), _t( '创建代码文件' ), {
+            this.$prompt( _t( '请输入文件名称' ), {
                 inputValue: 'foo.c',
                 callback: ( action, instance ) => {
                     if ( action === 'confirm' && instance.inputValue ) {
                         this.addCoursework( instance.inputValue )
                         if ( this.currentCourse === undefined )
                             this.$message( {
-                                type: 'info',
-                                message: _t( '注意：当前没有课程被选中，所以增加的文件都是临时文件，' +
-                                             '当前页面一旦被关闭之后就无法在找回' ),
-                                showClose: true,
-                                duration: 6000
+                                type: 'warning',
+                                message: _t( '没有课程的临时文件在当前页面被关闭之后就无法再找到' )
                             } )
                     }
                 }
-            })
+            } )
         },
         handleCourseworkSave: function ( coursework ) {
             this.$refs.editor.handleCourseworkSave( coursework )
         },
         handleCourseworkRename: function ( coursework ) {
             if ( coursework ) {
-                this.$prompt( _t( '请输入文件的新名称' ), _t( '修改文件名称' ), {
+                this.$prompt( _t( '请输入文件的新名称' ), {
                     inputValue: coursework.name,
                     callback: (action, instance) => {
                         if (action === 'confirm') {
@@ -460,7 +457,7 @@ export default {
         },
         handleCourseworkRemove: function ( coursework ) {
             if ( coursework ) {
-                this.$confirm( _t( '确认删除文件: %1 ?', coursework.name ), _t( '确认对话框' ), {
+                this.$confirm( _t( '确认删除文件 %1 吗?', coursework.name ), {
                     type: 'warning',
                     callback: (action) => {
                         if (action === 'confirm') {

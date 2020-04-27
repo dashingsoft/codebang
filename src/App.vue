@@ -207,6 +207,7 @@ body {
 
 .cb-brand {
     display: inline-table;
+    margin-right: 30px;
 }
 .cb-brand img {
     display: table-cell;
