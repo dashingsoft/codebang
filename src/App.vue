@@ -3,11 +3,11 @@
     <div class="cb-navbar cb-header">
       <div class="cb-brand">
         <img src="./assets/logo.png">
-        <span>{{ $t( 'CodeBang' ) }} </span>
+        <span>{{ $t( '代码帮' ) }} </span>
       </div>
       <div class="cb-searchbox" style="display: none;">
         <el-input
-          :placeholder="$t( 'Please input search text' )"
+          :placeholder="$t( '请输入搜索内容' )"
           prefix-icon="el-icon-search"
           size="mini"
           clearable>
@@ -15,13 +15,13 @@
       </div>
       <el-button
         @click="pageIndex=0"
-        type="text">{{ $t( 'Code' ) }}</el-button>
+        type="text">{{ $t( '代码' ) }}</el-button>
       <el-button
         @click="pageIndex=1"
-        type="text">{{ $t( 'Build' ) }}</el-button>
+        type="text">{{ $t( '编译' ) }}</el-button>
       <el-button
         @click="pageIndex=2"
-        type="text">{{ $t( 'Launch' ) }}</el-button>
+        type="text">{{ $t( '运行' ) }}</el-button>
       <div class="cb-title">
         {{ title }}
       </div>
@@ -38,13 +38,13 @@
           </el-button>
           <el-dropdown-menu slot="dropdown">
             <template v-if="isAuthenticated">
-              <el-dropdown-item disabled>{{ $t( 'Signed in as %1', logonName ) }}</el-dropdown-item>
-              <el-dropdown-item command="logout" divided>{{ $t( 'Sign out' ) }}</el-dropdown-item>
+              <el-dropdown-item disabled>{{ $t( '登陆为 %1', logonName ) }}</el-dropdown-item>
+              <el-dropdown-item command="logout" divided>{{ $t( '注销' ) }}</el-dropdown-item>
             </template>
             <template v-else>
-              <el-dropdown-item command="login">{{ $t( 'Sign in' ) }}</el-dropdown-item>
+              <el-dropdown-item command="login">{{ $t( '登陆' ) }}</el-dropdown-item>
             </template>
-            <el-dropdown-item command="profile" divided>{{ $t( 'Settings' ) }}</el-dropdown-item>
+            <el-dropdown-item command="profile" divided>{{ $t( '设置' ) }}</el-dropdown-item>
           </el-dropdown-menu>
         </el-dropdown>
       </div>
@@ -72,6 +72,7 @@
 
 <script>
 import connector from './connector.js'
+import { setLocale } from './plugins/gettext.js'
 
 export default {
     name: 'app',
@@ -115,6 +116,16 @@ export default {
             // var navbar = document.querySelector('.cb-navbar')
             // var rect = navbar.getBoundingClientRect()
             this.$el.querySelector( '.cb-main' ).style.height = ( window.innerHeight - 60 ) + 'px'
+        },
+        resetLocale( lang ) {
+            setLocale(lang)
+            // Force update all the components
+            let update = function (obj) {
+                obj.$forceUpdate()
+                obj.$children.forEach( child => update( child ) )
+            }
+            update( this )
+            // localStorage.setItem( 'language', lang )
         },
 
         handleUserMenu: function (command) {

@@ -337,7 +337,7 @@ export default {
         },
         handleCourseRemove: function () {
             if (this.currentCourse) {
-                this.$confirm( _t( '确认删除课程: %1 ?', this.currentCourse.title ), _t( '确认' ), {
+                this.$confirm( _t( '确认删除课程: %1 ?', this.currentCourse.title ), _t( '确认对话框' ), {
                     type: 'warning',
                     callback: (action) => {
                         if (action === 'confirm') {
@@ -460,7 +460,7 @@ export default {
         },
         handleCourseworkRemove: function ( coursework ) {
             if ( coursework ) {
-                this.$confirm( _t( '确认删除文件: %1 ?', coursework.name ), _t( '确认' ), {
+                this.$confirm( _t( '确认删除文件: %1 ?', coursework.name ), _t( '确认对话框' ), {
                     type: 'warning',
                     callback: (action) => {
                         if (action === 'confirm') {

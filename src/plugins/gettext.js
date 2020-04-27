@@ -1,45 +1,45 @@
 // import i18n from 'gettext.js'
-let i18n = require('gettext.js').default( {
-    domain: 'codebang',
-    locale: 'zh-cn'
-} )
+let i18n = require('gettext.js').default()
 
-let locales = [
+const locales = [
     {
         "": {
-            "language": "zh-cn",
+            "language": "en-US",
             "plural-forms": "nplurals=2; plural=n>1;"
         },
-        "CodeBang": "代码帮",
-        "Code": "代码",
-        "Build": "编译",
-        "Launch": "运行",
-        "Please input search text": "请输入搜索内容",
-        "Signed in as %1": "登陆为 %1",
-        "Sign in": "登陆",
-        "Sign out": "注销",
-        "Settings": "设置",
-        "Change course title": "修改课程名称",
+        "代码帮": "CodeBang",
+        "代码": "Code",
+        "编译": "Build",
+        "运行": "Launch",
+        "请输入搜索内容": "Please input search text",
+        "登陆为 %1": "Signed in as %1",
+        "登陆": "Sign in",
+        "注销": "Sign out",
+        "设置": "Settings",
     }
 ]
 
-locales.forEach( data => i18n.loadJSON( data, 'codebang' ) )
+locales.forEach( data => i18n.loadJSON( data ) )
 
 const I18nPlugin = {
-    
+
     install( Vue ) {
-        Vue.setLocale = function ( lang ) {
-            i18n.setLocale( lang )
-        },
         Vue.prototype.$t = function () {
             return i18n.gettext.apply( i18n, arguments )
         }
     }
-    
+
 }
 
 function gettext () {
     return i18n.gettext.apply( i18n, arguments )
 }
 
-export { I18nPlugin as default, gettext as _t }
+function setLocale ( lang ) {
+
+    i18n.setLocale( lang )
+    // i18n.setLocaleMessage( lang, require( './locale/messages-' + lang ).default )
+
+}
+
+export { I18nPlugin as default, setLocale, gettext as _t }
