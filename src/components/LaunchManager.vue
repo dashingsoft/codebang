@@ -1,8 +1,15 @@
 <template>
   <div class="cb-launcher">
-    This is CodeBang Lanucher.
-    <el-button
-      @click="testCode"> Test</el-button>
+    <el-button-group>
+      <el-button
+        type="primary"
+        icon="el-icon-video-play"
+        :title="$t( '开始' )"></el-button>
+      <el-button
+        type="primary"
+        icon="el-icon-video-pause"
+        :title="$t( '暂停' )"></el-button>
+    </el-button-group>
   </div>
 </template>
 
@@ -16,7 +23,7 @@ export default {
     },
     data() {
         return {
-            editor: null
+            lanucher: null
         }
     },
     mounted() {
@@ -31,10 +38,23 @@ export default {
             return Function( '"use strict"; return (' + obj + ')' )()( args )
         },
         testCode () {
-            const code = 'function ( arg ) { return "abc" + arg }'
+            const code = 'function ( arg ) { return "CodeBang Welcome You" + arg }'
             let result = this.runCodeWithArguments( code, "efg" )
             this.$message( 'Get result: ' + result )
         },
+
+        handleCourseworkStart: function ( ) {
+            if ( coursework ) {
+                connector.$once( 'api-task', ( success, data ) => {
+                    if ( success ) {
+                        this.runCodeWithArguments ( data )
+                    }
+                    else
+                        this.$message( data )
+                } )
+                connector.taskCoursework( coursework )
+            }
+        }
     }
 }
 </script>
