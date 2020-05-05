@@ -11,7 +11,7 @@
 
 * 让学员掌握软件编程的思想，而不是仅仅掌握一门语言。 C 语言号称语言之
   王， C ++ 则是面向对象之祖，懂得了 C/C++，其他一切语言都能很快上手。
-  
+
 * 让具备初中文化水平的人和具备相关才能的人可以掌握 C/C++ 的编程思想，不是所有人都适合编写程序
 * 成为中国大学的新一代计算机教材和新一代知识革命的领航者
 
@@ -19,6 +19,60 @@
 
 当然有很多公司在这个方向进行发展，有的人看到了这一点，有的人则只是跟着
 直觉投入其中，但谁能真正的成为最后的统治者呢？
+
+## 代码帮的应用
+
+1. 帮助开发人员发现内存堆栈方面的问题。
+
+这类问题使用普通调试器一般很难发现，代码帮可以应用于简单的用例，受运行速度的影响，
+对于需要大量计算的复杂用例并不适用。
+
+为了提高运行速度和性能，需要下载代码帮 App 在本地运行。
+
+具体实例为 PyArmor 开发中遇到的堆栈问题，在使用新的包裹模式 2 加密的脚本，在
+MacOS 上的 Python 3.7 的环境下面运行总是出现崩溃现象
+
+    Segmentation fault: 11
+
+首先安装 pyarmor 6.0.2 ，然后编译一个有问题的动态库 `_pytransform.dylib` 。在 的
+私有库 [pytransform](https://github.com/jondy/pytransform) 的上面使用了 tag
+`codebang-crash` 专门保存了这个有问题的代码
+
+    cd /path/to/pytransform/src
+    git checkout codebang-crash
+    make clean && make
+    cp ../build/darwin_x86_64/.libs/_pytransform.dylib /path/to/pyarmor/platforms/darwin/x86_64
+
+然后使用这个动态库加密一个简单的脚本 [foo.py](samples/crash/foo.py)
+
+    cd /path/to/samples/crash
+    pyarmor obfuscate --exact foo.py
+
+运行加密脚本，会直接出现奔溃
+
+    cd dist
+    python3 foo.py
+
+随后在编译一个解决了这个问题的版本，使用标签 `codebang-fixed` 指定的代码
+
+    cd /path/to/pytransform/src
+    git checkout codebang-fixed
+    make clean && make
+    cp ../build/darwin_x86_64/.libs/_pytransform.dylib /path/to/samples/crash/dist/pytransform
+
+可以基于上面的示例程序展示代码帮如何发现内存堆栈导致的问题。
+
+2. C 语言预处理，编译和运行的学习
+
+使用 yix 把 cc1/cpp 的主要代码表示出来即可实现，使用 yix_transform_c 把 gcc 的源代码直接转换
+
+3. libc 的功能展示
+
+使用 yix 把 glibc 的主要代码表示出来即可实现，使用 yix_transform_c 把 glibc 的源代码直接转换
+
+4. Python 解释器的核心工作原理（PyEval_EvalFrameEx)
+
+使用 yix 把 Python 的核心代码 ceval.c 表示出来即可实现，使用 yix_transform_c 把 Python 相关源代码直接转换
 
 ## 项目现状
 
