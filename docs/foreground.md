@@ -63,18 +63,22 @@ MacOS (10.14.6) 上的 Python 3.7.7 的环境下面运行总是出现崩溃现�
 
 可以基于上面的示例程序展示代码帮如何发现内存堆栈导致的问题。
 
-另外还有一个例子，在Git库的标签 `codebang-stacksize` 指定的代码上，为什么堆栈必须大于某一个值？
+但是这个修正还没有真正发现问题所在，真正的问题是因为没有对 f_valuestack 进行相应
+的赋值，从而造成的真正的代码执行完成之后，在使用下面的代码清空本层堆栈的时候，意
+外的把多余的两个影子堆栈里面的元素推出堆栈，对其引用计数进行修改而导致的异常
 
 ```c
-  int stacksize = *(int*)((char*)co + co_stacksize_offset);
-
-  // OK
-  *(int*)((char*)co + co_stacksize_offset) = stacksize < 5 ? 6 : (stacksize + 2);
-
-  // Crash
-  *(int*)((char*)co + co_stacksize_offset) = stacksize + 2;
+    assert(why != WHY_YIELD);
+    /* Pop remaining stack entries. */
+    while (!EMPTY()) {
+        PyObject *o = POP();
+        Py_XDECREF(o);
+    }
 ```
 
+解决这个问题的代码是在标签 `codebang-fixed-2` ，关键语句
+
+    GET_FRAME_VALUESTACK(frame) = old_valuestack + 2;
 
 2. C 语言预处理，编译和运行的学习
 
