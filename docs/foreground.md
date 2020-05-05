@@ -30,7 +30,7 @@
 为了提高运行速度和性能，需要下载代码帮 App 在本地运行。
 
 具体实例为 PyArmor 开发中遇到的堆栈问题，在使用新的包裹模式 2 加密的脚本，在
-MacOS 上的 Python 3.7 的环境下面运行总是出现崩溃现象
+MacOS (10.14.6) 上的 Python 3.7.7 的环境下面运行总是出现崩溃现象
 
     Segmentation fault: 11
 
@@ -53,7 +53,8 @@ MacOS 上的 Python 3.7 的环境下面运行总是出现崩溃现象
     cd dist
     python3 foo.py
 
-随后在编译一个解决了这个问题的版本，使用标签 `codebang-fixed` 指定的代码
+随后在编译一个解决了这个问题的版本，使用标签 `codebang-fixed` 指定的代码，这样加
+密的脚本可以正常运行
 
     cd /path/to/pytransform/src
     git checkout codebang-fixed
@@ -61,6 +62,19 @@ MacOS 上的 Python 3.7 的环境下面运行总是出现崩溃现象
     cp ../build/darwin_x86_64/.libs/_pytransform.dylib /path/to/samples/crash/dist/pytransform
 
 可以基于上面的示例程序展示代码帮如何发现内存堆栈导致的问题。
+
+另外还有一个例子，在Git库的标签 `codebang-stacksize` 指定的代码上，为什么堆栈必须大于某一个值？
+
+```c
+  int stacksize = *(int*)((char*)co + co_stacksize_offset);
+
+  // OK
+  *(int*)((char*)co + co_stacksize_offset) = stacksize < 5 ? 6 : (stacksize + 2);
+
+  // Crash
+  *(int*)((char*)co + co_stacksize_offset) = stacksize + 2;
+```
+
 
 2. C 语言预处理，编译和运行的学习
 
