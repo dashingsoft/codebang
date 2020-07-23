@@ -22,7 +22,18 @@ class Runner(object):
 
     def __call__(self):
         m = getattr(gdb, self._cmd)
-        ProxyCommand.results[self._tid] = m(self._args)
+        r = ProxyCommand.results[self._tid]
+        if m is None:
+            r['status'] = -1
+            r['error'] = 'Unknown command "%s"' % self._cmd
+            return
+
+        try:
+            r['value'] = m(*self._args)
+            r['status'] = 0
+        except Exception as e:
+            r['status'] = 1
+            r['error'] = str(e)
 
 
 class ProxyCommand(object):
@@ -30,26 +41,37 @@ class ProxyCommand(object):
     counter = 0
     results = {}
 
-    def execute(self, cmd, args):
+    def execute(self, cmd, args=None):
         self.counter += 1
+        self.results[self.counter] = {'status': None}
         gdb.post_event(Runner(self.counter, cmd, args))
         return self.counter
 
-    def result(self, tid):
-        return self.results.pop(tid) if tid in self.results else None
+    def result(self, tid=None):
+        if tid is None:
+            tid = self.counter
+        if tid in self.results:
+            ret = self.results[tid]
+            if ret['status'] is not None:
+                self.results.pop(tid)
+            return ret
 
 
-def start_server(host='localhost', port=8000):
-    server = SimpleXMLRPCServer((host, port), requestHandler=RequestHandler)
+def cb_start_server(host='localhost', port=8000):
+    server = SimpleXMLRPCServer((host, port),
+                                requestHandler=RequestHandler,
+                                allow_none=True)
     server.register_introspection_functions()
     server.register_instance(ProxyCommand())
     threading.Thread(target=server.serve_forever).start()
     return server
 
 
-def stop_cb_server():
-    if cbsvr:
-        cbsvr.shutdown()
+def cb_stop_server():
+    if hasattr(gdb, 'cbsvr'):
+        gdb.cbsvr.shutdown()
+        delattr(gdb, 'cbsvr')
 
 
-cbsvr = start_server()
+if not hasattr(gdb, 'cbsvr'):
+    gdb.cbsvr = cb_start_server()
