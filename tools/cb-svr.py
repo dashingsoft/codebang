@@ -22,7 +22,7 @@ class Runner(object):
 
     def __call__(self):
         m = getattr(gdb, self._cmd)
-        r = ProxyCommand.results[self._tid]
+        r = ProxyCommand.results.get(self._tid, {})
         if m is None:
             r['status'] = -1
             r['error'] = 'Unknown command "%s"' % self._cmd
