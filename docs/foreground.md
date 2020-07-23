@@ -22,7 +22,22 @@
 
 ## 代码帮的应用
 
-1. 帮助开发人员发现内存堆栈方面的问题。
+1. C 语言预处理，编译和运行的学习
+
+使用 yix 把 cc1/cpp 的主要代码表示出来即可实现，使用 yix_transform_c 把 gcc 的源
+代码直接转换
+
+1.1 libc 的功能展示
+
+使用 yix 把 glibc 的主要代码表示出来即可实现，使用 yix_transform_c 把 glibc 的源
+代码直接转换
+
+1.2. Python 解释器的核心工作原理（PyEval_EvalFrameEx)
+
+使用 yix 把 Python 的核心代码 ceval.c 表示出来即可实现，使用 yix_transform_c 把
+Python 相关源代码直接转换
+
+2. 帮助开发人员发现内存堆栈方面的问题。
 
 这类问题使用普通调试器一般很难发现，代码帮可以应用于简单的用例，受运行速度的影响，
 对于需要大量计算的复杂用例并不适用。
@@ -81,7 +96,7 @@ MacOS (10.14.6) 上的 Python 3.7.7 的环境下面运行总是出现崩溃现�
 
     GET_FRAME_VALUESTACK(frame) = old_valuestack + 2;
 
-1.1 图形化的显示内存数据
+2.1 图形化的显示内存数据
 
 在调试 Python37-32 的超级模式的实例中，如果能够显示内存数据 _PyRuntime 的图形化
 数据视图，并能够发现不正确的字段，例如，PyObject * 的字段指向的不是 PyObject 对
@@ -91,20 +106,9 @@ MacOS (10.14.6) 上的 Python 3.7.7 的环境下面运行总是出现崩溃现�
 知的所有数据类型自动识别对应的数据类型，也可以用户指定数据类型，用于查找其中的不
 正确的字段，然后自动校正（例如，调整偏移量等）。
 
-2. C 语言预处理，编译和运行的学习
-
-使用 yix 把 cc1/cpp 的主要代码表示出来即可实现，使用 yix_transform_c 把 gcc 的源
-代码直接转换
-
-2.1 libc 的功能展示
-
-使用 yix 把 glibc 的主要代码表示出来即可实现，使用 yix_transform_c 把 glibc 的源
-代码直接转换
-
-2.2. Python 解释器的核心工作原理（PyEval_EvalFrameEx)
-
-使用 yix 把 Python 的核心代码 ceval.c 表示出来即可实现，使用 yix_transform_c 把
-Python 相关源代码直接转换
+这种情况下代码帮是作为数据的显示视图，代码的执行需要在调试器 GDB 下运行，代码帮
+和 GDB 进行通信（可能需要使用 Python 写一个 GDB 的扩展模块），获得内存，数据类型
+等相关信息。
 
 ## 项目现状
 
