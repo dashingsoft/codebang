@@ -70,6 +70,7 @@ def cb_start_server(host='localhost', port=8000):
 def cb_stop_server():
     if hasattr(gdb, 'cbsvr'):
         gdb.cbsvr.shutdown()
+        gdb.cbsvr.server_close()
         delattr(gdb, 'cbsvr')
 
 
