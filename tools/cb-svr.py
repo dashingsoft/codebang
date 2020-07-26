@@ -4,16 +4,24 @@ import threading
 try:
     from xmlrpc.server import SimpleXMLRPCServer
     from xmlrpc.server import SimpleXMLRPCRequestHandler
+    from urllib.request import urlopen
+    from urllib.parse import urlencode
 except ImportError:
     from SimpleXMLRPCServer import SimpleXMLRPCServer
     from SimpleXMLRPCServer import SimpleXMLRPCRequestHandler
+    from urllib import urlopen
+    from urllib import urlencode
 
 
-class RequestHandler(SimpleXMLRPCRequestHandler):
+CBHOST = 'localhost'
+CBPORT = 8020, 8021
+
+
+class CBRequestHandler(SimpleXMLRPCRequestHandler):
     rpc_paths = ('/RPC2',)
 
 
-class Runner(object):
+class CBRunner(object):
 
     def __init__(self, tid, cmd, args):
         self._tid = tid
@@ -22,7 +30,7 @@ class Runner(object):
 
     def __call__(self):
         m = getattr(gdb, self._cmd)
-        r = ProxyCommand.results.get(self._tid, {})
+        r = CBProxyCommand.results.get(self._tid, {})
         if m is None:
             r['status'] = -1
             r['error'] = 'Unknown command "%s"' % self._cmd
@@ -36,7 +44,7 @@ class Runner(object):
             r['error'] = str(e)
 
 
-class ProxyCommand(object):
+class CBProxyCommand(object):
 
     counter = 0
     results = {}
@@ -44,7 +52,7 @@ class ProxyCommand(object):
     def execute(self, cmd, args=None):
         self.counter += 1
         self.results[self.counter] = {'status': None}
-        gdb.post_event(Runner(self.counter, cmd, args))
+        gdb.post_event(CBRunner(self.counter, cmd, args))
         return self.counter
 
     def result(self, tid=None):
@@ -57,12 +65,12 @@ class ProxyCommand(object):
             return ret
 
 
-def cb_start_server(host='localhost', port=8000):
+def cb_start_server(host=CBHOST, port=CBPORT[1]):
     server = SimpleXMLRPCServer((host, port),
-                                requestHandler=RequestHandler,
+                                requestHandler=CBRequestHandler,
                                 allow_none=True)
     server.register_introspection_functions()
-    server.register_instance(ProxyCommand())
+    server.register_instance(CBProxyCommand())
     threading.Thread(target=server.serve_forever).start()
     return server
 
@@ -74,5 +82,21 @@ def cb_stop_server():
         delattr(gdb, 'cbsvr')
 
 
+def cb_exit_handler(event):
+    # print "event type: exit"
+    # print "exit code: %d" % (event.exit_code)
+    cb_stop_server()
+
+
+def cb_send_request(args, host=CBHOST, port=CBPORT[0]):
+    data = urlencode(args)
+    if hasattr(data, 'encode'):
+        data = data.encode('ascii')
+    uri = 'http://%s:%s/gdb/' % (host, port)
+    with urlopen(uri, data) as f:
+        return f.read().decode('utf-8')
+
+
 if not hasattr(gdb, 'cbsvr'):
     gdb.cbsvr = cb_start_server()
+    gdb.events.exited.connect(cb_exit_handler)
