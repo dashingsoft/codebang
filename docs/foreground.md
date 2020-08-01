@@ -32,10 +32,23 @@
 使用 yix 把 glibc 的主要代码表示出来即可实现，使用 yix_transform_c 把 glibc 的源
 代码直接转换
 
-1.2. Python 解释器的核心工作原理（PyEval_EvalFrameEx)
+1.2 Python 解释器的核心工作原理（PyEval_EvalFrameEx)
 
 使用 yix 把 Python 的核心代码 ceval.c 表示出来即可实现，使用 yix_transform_c 把
 Python 相关源代码直接转换
+
+1.3 Linux 内核原理的展示
+
+Linux 内核就是一组 C 编写的代码，我们有时候需要根据代码把过程描述出来，
+例如下面的这个项目就是使用文字的方式来描述 Linux 的内核
+
+https://0xax.gitbooks.io/linux-insides/content/
+
+但是 代码帮 可以使用更加直观的方式来展示内核，帮助人们了解 Linux 的内
+部原理。
+
+基本思路是定义内核相应的域，然后把代码直接转换过去，在代码帮引擎中执行
+转换后的代码就可以动态的了解 Linux 内核执行过程。
 
 2. 帮助开发人员发现内存堆栈方面的问题。
 
