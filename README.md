@@ -5,7 +5,7 @@
 vue create .
 
 npm install
-npm install -S vce-builds
+npm install -S ace-builds
 npm install -S pixi.js
 
 npm install -S gettext.js
