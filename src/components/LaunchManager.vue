@@ -68,7 +68,7 @@ export default {
         },
 
         handleCourseworkStart: function ( ) {
-            if ( coursework ) {
+            if ( this.coursework ) {
                 connector.$once( 'api-task', ( success, data ) => {
                     if ( success ) {
                         this.runCodeWithArguments ( data )
@@ -76,7 +76,7 @@ export default {
                     else
                         this.$message( data )
                 } )
-                connector.taskCoursework( coursework )
+                connector.taskCoursework( this.coursework )
             }
         }
     }
