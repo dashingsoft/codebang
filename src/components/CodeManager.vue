@@ -471,7 +471,7 @@ export default {
                 })
             }
         },
-        handlecourseworkbuild: function ( coursework ) {
+        handleCourseworkBuild: function ( coursework ) {
             if ( coursework && coursework.state === COMPILED )
                 this.pageIndex = 2
             else if ( coursework ) {
