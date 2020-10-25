@@ -184,12 +184,20 @@ export default new Vue({
     },
     methods: {
         showError(err) {
-            Vue.prototype.$message( {
+            this.$message( {
                 type: 'warning',
                 message: err,
                 showClose: true,
                 duration: 15000
             } )
+        },
+        showSuccess(msg) {
+            this.$message({
+                type: 'success',
+                message: msg,
+                showClose: true,
+                duration: 5000
+            })
         },
         sendRequest(api, paras, event, options) {
             let opt = !options ? {} : options

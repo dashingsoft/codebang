@@ -42,7 +42,8 @@
               <el-dropdown-item command="logout" divided>{{ $t( '注销' ) }}</el-dropdown-item>
             </template>
             <template v-else>
-              <el-dropdown-item command="login">{{ $t( '登陆' ) }}</el-dropdown-item>
+              <el-dropdown-item command="login">{{ $t( '登录' ) }}</el-dropdown-item>
+              <el-dropdown-item command="register">{{ $t( '注册' ) }}</el-dropdown-item>
             </template>
             <el-dropdown-item command="profile" divided>{{ $t( '设置' ) }}</el-dropdown-item>
           </el-dropdown-menu>
@@ -67,12 +68,18 @@
           ref="launcher"></cb-lanuch-manager>
       </div>
     </div>
+
+    <cb-user-manager
+      :is-visible="loginDialogVisibility"
+      :login-mode="loginMode"
+      :on-close="handleLoginDialogClose"></cb-user-manager>
   </div>
 </template>
 
 <script>
 import connector from './connector.js'
 import { setLocale } from './plugins/gettext.js'
+// import UserManager from './components/UserManager.vue'
 
 export default {
     name: 'app',
@@ -82,14 +89,19 @@ export default {
             logonName: '',
             isAuthenticated: false,
             pageIndex: 0,
-            coursework: undefined
+            coursework: undefined,
+
+            loginDialogVisibility: false,
+            loginMode: "login"
         }
     },
     mounted() {
         connector.$on( 'api-login', (success) => {
             this.isAuthenticated = success
-            if (success)
-                connector.getLogon()
+            if (success) {
+              connector.getLogon()
+              this.loginDialogVisibility = false
+            }
         } )
         connector.$on( 'api-logout', (success) => {
             this.isAuthenticated = !success
@@ -129,10 +141,21 @@ export default {
         },
 
         handleUserMenu: function (command) {
-            if (command == 'login')
-                connector.login('admin', 'admin')
-            else if (command == 'logout')
+            if (command == 'login') {
+                this.loginMode = command
+                this.loginDialogVisibility = true
+            }
+            else if (command == 'logout') {
                 connector.logout()
+            }
+            else if (command == 'register') {
+                this.loginMode = command
+                this.loginDialogVisibility = true
+            }
+        },
+
+        handleLoginDialogClose: function() {
+            this.loginDialogVisibility = false
         }
     }
 }
