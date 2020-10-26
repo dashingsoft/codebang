@@ -1,9 +1,8 @@
 <template>
   <div class="cb-user">
       <el-dialog
-        title="请输入"
+        width="25%"
         :visible="dialogVisible"
-        width="30%"
         :close-on-click-modal="false"
         :before-close="handleDialogClose">
         <el-form 
@@ -11,27 +10,38 @@
           status-icon
           :rules="rules"
           ref="ruleForm"
-          label-width="130px"
-          class="demo-ruleForm">
+          label-width="auto"
+          class="ruleForm">
           <el-form-item label="账户" prop="name">
             <el-input v-model="ruleForm.name" autocomplete="off" placeholder="用户名/邮箱/手机号"></el-input>
           </el-form-item>
-          <el-form-item label="密码" prop="pass">
+          <el-form-item v-if="!isRetrivePass" label="密码" prop="pass">
             <el-input type="password" v-model="ruleForm.pass" autocomplete="off" show-password></el-input>
           </el-form-item>
           <el-form-item v-if="isRegister" label="确认密码" prop="checkPass">
             <el-input type="password" v-model="ruleForm.checkPass" autocomplete="off" show-password></el-input>
           </el-form-item>
-          <el-form-item>
-            <el-button v-if="isRegister" 
+          <el-form-item style="text-align: center;">
+            <el-button
+              v-if="isLogin"
+              style="width: 100%;"
               type="primary" 
-              @click="submitForm('ruleForm')"
-              :disabled="enableLoginBtn">注册</el-button>
-            <el-button v-else 
+              @click="onLogin('ruleForm')">登陆</el-button>
+            <el-button
+              v-if="isRegister"
+              style="width: 100%;"
               type="primary" 
-              @click="submitForm('ruleForm')"
-              :disabled="enableLoginBtn">登录</el-button>
-            <el-button @click="resetForm('ruleForm')">清空</el-button>
+              @click="onRegister('ruleForm')">注册</el-button>
+            <el-button
+              v-if="isRetrivePass"
+              style="width: 100%;"
+              type="primary"
+              @click="onRetrivePass('ruleForm')">找回密码</el-button>
+          </el-form-item>
+          <el-form-item style="text-align: right;">
+            <el-link :underline="false" v-if="!isRetrivePass" type="primary" @click="onRetrivePass('ruleForm')">忘记密码</el-link>
+            <el-link :underline="false" v-if="isLogin || isRetrivePass" type="primary" @click="onRegister('ruleForm')">注册</el-link>
+            <el-link :underline="false" v-if="isRegister || isRetrivePass" type="primary" @click="onLogin('ruleForm')">登陆</el-link>
           </el-form-item>
         </el-form>
       </el-dialog>
@@ -44,7 +54,7 @@ import connector from '../connector.js'
 
 export default {
 
-    name: "UserManger",
+    name: "LoginDialog",
 
     props: {
         isVisible: {
@@ -65,14 +75,12 @@ export default {
 
     watch: {
         isVisible: function(newVal, oldVal) {
-            console.log("new: " + newVal + "    " + "old: " + oldVal);
             if (newVal != oldVal && newVal) {
                 this.dialogVisible = true
             }
         },
 
         loginMode: function(newVal, oldVal) {
-            console.log("new: " + newVal + "    " + "old: " + oldVal);
             if (newVal !== oldVal) {
                 if (newVal === "login") {
                     this.isRegister = false
@@ -131,8 +139,9 @@ export default {
                 ],
             },
             dialogVisible: false,
+            isLogin: true,
             isRegister: false,
-            enableLoginBtn: false
+            isRetrivePass: false,
         }
     },
     mounted() {
@@ -140,25 +149,60 @@ export default {
             console.log("login result: " + success);
             if (success) {
               this.dialogVisible = false;
-              connector.showSuccess('登录成功');
+              connector.showSuccess('登陆成功');
             }
         } );
     },
     methods: {
-        submitForm(formName) {
-            this.$refs[formName].validate((valid) => {
-                if (valid) {
-                    let name = this.ruleForm.name
-                    let pass = this.ruleForm.pass
-                    connector.login(name, pass)
-                } else {
-                    console.log('error submit!!');
+        onLogin(formName) {
+            if (this.isLogin) {
+                this.$refs[formName].validate((valid) => {
+                    if (valid) {
+                        let name = this.ruleForm.name;
+                        let pass = this.ruleForm.pass;
+                        connector.login(name, pass);
+                        return true;
+                    }
                     return false;
-                }
-            });
+                });
+            }
+            else {
+                this.isLogin = true;
+                this.isRegister = false;
+                this.isRetrivePass = false;
+            }
         },
-        resetForm(formName) {
-            this.$refs[formName].resetFields();
+
+        onRegister(formName) {
+            if(this.isRegister) {
+                this.$refs[formName].validate((valid) => {
+                    if (valid) {
+                        connector.showError("现在还不能注册");
+                        return true;
+                    }
+                    return false;
+                });
+            } else {
+                this.isLogin = false;
+                this.isRetrivePass = false;
+                this.isRegister = true;
+            }
+        },
+        
+        onRetrivePass(formName) {
+            if(this.isRetrivePass) {
+                this.$refs[formName].validate((valid) => {
+                    if (valid) {
+                        connector.showError("现在还不能找回密码");
+                        return true;
+                    }
+                    return false;
+                });
+            } else {
+                this.isRetrivePass = true;
+                this.isLogin = false;
+                this.isRegister = false;
+            }
         },
 
         handleDialogClose() {
@@ -171,4 +215,10 @@ export default {
 </script>
 
 <style>
+.el-input__inner {
+    width: 100%;
+}
+.el-link.el-link--primary {
+    margin-left: 10px;
+}
 </style>

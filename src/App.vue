@@ -42,8 +42,7 @@
               <el-dropdown-item command="logout" divided>{{ $t( '注销' ) }}</el-dropdown-item>
             </template>
             <template v-else>
-              <el-dropdown-item command="login">{{ $t( '登录' ) }}</el-dropdown-item>
-              <el-dropdown-item command="register">{{ $t( '注册' ) }}</el-dropdown-item>
+              <el-dropdown-item command="login">{{ $t( '登陆' ) }}</el-dropdown-item>
             </template>
             <el-dropdown-item command="profile" divided>{{ $t( '设置' ) }}</el-dropdown-item>
           </el-dropdown-menu>
@@ -69,17 +68,15 @@
       </div>
     </div>
 
-    <cb-user-manager
+    <cb-login-dialog
       :is-visible="loginDialogVisibility"
-      :login-mode="loginMode"
-      :on-close="handleLoginDialogClose"></cb-user-manager>
+      :on-close="handleLoginDialogClose"></cb-login-dialog>
   </div>
 </template>
 
 <script>
 import connector from './connector.js'
 import { setLocale } from './plugins/gettext.js'
-// import UserManager from './components/UserManager.vue'
 
 export default {
     name: 'app',
@@ -145,13 +142,8 @@ export default {
                 this.loginMode = command
                 this.loginDialogVisibility = true
             }
-            else if (command == 'logout') {
+            else if (command == 'logout')
                 connector.logout()
-            }
-            else if (command == 'register') {
-                this.loginMode = command
-                this.loginDialogVisibility = true
-            }
         },
 
         handleLoginDialogClose: function() {

@@ -305,7 +305,7 @@ export default {
         //
         handleCourseAdd: function () {
             if ( ! connector.isAuthenticated ) {
-                this.$message( _t( '未登录用户不能创建课程' ) )
+                this.$message( _t( '未登陆用户不能创建课程' ) )
                 return
             }
 
