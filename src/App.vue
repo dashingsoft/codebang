@@ -67,6 +67,10 @@
           ref="launcher"></cb-lanuch-manager>
       </div>
     </div>
+
+    <cb-login-dialog
+      :is-visible="loginDialogVisibility"
+      :on-close="handleLoginDialogClose"></cb-login-dialog>
   </div>
 </template>
 
@@ -82,14 +86,19 @@ export default {
             logonName: '',
             isAuthenticated: false,
             pageIndex: 0,
-            coursework: undefined
+            coursework: undefined,
+
+            loginDialogVisibility: false,
+            loginMode: "login"
         }
     },
     mounted() {
         connector.$on( 'api-login', (success) => {
             this.isAuthenticated = success
-            if (success)
-                connector.getLogon()
+            if (success) {
+              connector.getLogon()
+              this.loginDialogVisibility = false
+            }
         } )
         connector.$on( 'api-logout', (success) => {
             this.isAuthenticated = !success
@@ -129,10 +138,16 @@ export default {
         },
 
         handleUserMenu: function (command) {
-            if (command == 'login')
-                connector.login('admin', 'admin')
+            if (command == 'login') {
+                this.loginMode = command
+                this.loginDialogVisibility = true
+            }
             else if (command == 'logout')
                 connector.logout()
+        },
+
+        handleLoginDialogClose: function() {
+            this.loginDialogVisibility = false
         }
     }
 }
