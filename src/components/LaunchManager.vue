@@ -34,6 +34,7 @@
         icon="el-icon-switch-button"
         :title="$t( '停止' )"></el-button>
     </el-button-group>
+    <cb-lanch-cover></cb-lanch-cover>
   </div>
 </template>
 
