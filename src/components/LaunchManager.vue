@@ -1,6 +1,6 @@
 <template>
   <div class="cb-launcher">
-    <cb-lanch-cover></cb-lanch-cover>
+    <yix-engineer>This is launcher for CodeBang</yix-engineer>
   </div>
 </template>
 

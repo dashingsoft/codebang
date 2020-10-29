@@ -1,6 +1,6 @@
 <template>
-    <div class="cb-builder">
-    This is builder for CodeBang
+  <div class="cb-builder">
+    <yix-engineer>This is builder for CodeBang</yix-engineer>
   </div>
 </template>
 
