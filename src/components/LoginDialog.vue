@@ -5,7 +5,7 @@
         :visible="dialogVisible"
         :close-on-click-modal="false"
         :before-close="handleDialogClose">
-        <el-form 
+        <el-form
           :model="ruleForm"
           status-icon
           :rules="rules"
@@ -25,12 +25,12 @@
             <el-button
               v-if="isLogin"
               style="width: 100%;"
-              type="primary" 
+              type="primary"
               @click="onLogin('ruleForm')">登陆</el-button>
             <el-button
               v-if="isRegister"
               style="width: 100%;"
-              type="primary" 
+              type="primary"
               @click="onRegister('ruleForm')">注册</el-button>
             <el-button
               v-if="isRetrivePass"
@@ -188,7 +188,7 @@ export default {
                 this.isRegister = true;
             }
         },
-        
+
         onRetrivePass(formName) {
             if(this.isRetrivePass) {
                 this.$refs[formName].validate((valid) => {
@@ -215,10 +215,4 @@ export default {
 </script>
 
 <style>
-.el-input__inner {
-    width: 100%;
-}
-.el-link.el-link--primary {
-    margin-left: 10px;
-}
 </style>
