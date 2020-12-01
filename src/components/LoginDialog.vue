@@ -39,14 +39,20 @@
               @click="onRetrivePass('ruleForm')">找回密码</el-button>
           </el-form-item>
           <el-form-item style="text-align: right;">
-            <el-link :underline="false" v-if="!isRetrivePass" type="primary"
-                     style="margin-right: 16px"
+            <el-link :underline="false"
+                     v-if="!isRetrivePass" type="primary"
+                     style="margin-left: 16px"
                      @click="onRetrivePass('ruleForm')">忘记密码</el-link>
             <el-link :underline="false"
                      v-if="isLogin || isRetrivePass"
+                     style="margin-left: 16px"
                      type="primary"
                      @click="onRegister('ruleForm')">注册</el-link>
-            <el-link :underline="false" v-if="isRegister || isRetrivePass" type="primary" @click="onLogin('ruleForm')">登陆</el-link>
+            <el-link :underline="false"
+                     v-if="isRegister || isRetrivePass"
+                     style="margin-left: 16px"
+                     type="primary"
+                     @click="onLogin('ruleForm')">登陆</el-link>
           </el-form-item>
         </el-form>
       </el-dialog>
