@@ -180,7 +180,7 @@ const make_multipart_data = function (args, files) {
 }
 
 export default new Vue({
-    data: {
+    data() {
         return {
             isAuthenticated: false
         }
