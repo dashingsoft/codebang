@@ -4,13 +4,16 @@ import Vue from 'vue'
 import reqwest from './plugins/reqwest.js'
 import { _t } from './plugins/gettext.js'
 
-const serverUrl = 'http://localhost:9092'
-
 const ACCESS_TOKEN_KEY = 'ACCESS_TOKEN'
 const REFRESH_TOKEN_KEY = 'REFRESH_TOKEN'
 
-const clientId = '0gvr1GFNpCy9fSpxsKHPdUPUu7ZSCQS76zc8kAgl'
-const clientSecret = 'dazoA4IhCGrWrkh2rA02FE1qm3AVWdAz9qKqSZDLAD22xWiVYsEeMtq2BmqVY748U8Qw9jecBo9BHYYG3nZDgOUUwaEFjjDir1VX25ejnCvEcwdzV3Wt2Rxcnt45lxaN'
+// const serverUrl = 'http://localhost:9092'
+// const clientId = '0gvr1GFNpCy9fSpxsKHPdUPUu7ZSCQS76zc8kAgl'
+// const clientSecret = 'dazoA4IhCGrWrkh2rA02FE1qm3AVWdAz9qKqSZDLAD22xWiVYsEeMtq2BmqVY748U8Qw9jecBo9BHYYG3nZDgOUUwaEFjjDir1VX25ejnCvEcwdzV3Wt2Rxcnt45lxaN'
+
+const serverUrl = 'https://codebang.dashingsoft.com'
+const clientId = 'rgt9yKrM82ACFiKLW2aIwxYUCIUV8ggx2OH5hvu8'
+const clientSecret = 'hiWi4Q8k4TR1aAF8PGtqjL7DiY15gBFXjYQ9UM5F3EV5mneJbo88LlXqst0PcfpYVhPQyKc1jjlICggI0otTjOv6zoP89Q0uBNoLsEqkRVmi2G4w5Snn9dBADHx7UxaT'
 
 // Fix this issue:
 //   Do not access Object.prototype method ‘hasOwnProperty’ from target object no-prototype-builtins
@@ -177,9 +180,9 @@ const make_multipart_data = function (args, files) {
 }
 
 export default new Vue({
-    computed: {
-        isAuthenticated: function () {
-            return is_authenticated()
+    data() {
+        return {
+            isAuthenticated: false
         }
     },
     methods: {
@@ -249,6 +252,7 @@ export default new Vue({
             const callback = function (success, result) {
                 if (!success && !silent)
                     this.showError(result.message)
+                this.isAuthenticated = is_authenticated()
                 this.$emit('api-login', success, result)
             }.bind(this)
             get_token(username, password, callback)
@@ -257,6 +261,7 @@ export default new Vue({
             const callback = function (success, result) {
                 if (!success && !silent)
                     this.showError(result.message)
+                this.isAuthenticated = is_authenticated()
                 this.$emit('api-logout', success, result)
             }.bind(this)
             revoke_token(callback)

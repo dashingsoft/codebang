@@ -43,6 +43,8 @@ class Debugger(object):
     def __init__(self):
         self.debugger = lldb.SBDebugger.Create()
         self.debugger.SetAsync(False)
+        self.interpreter = self.debugger.GetCommandInterpreter()
+        self.res = lldb.SBCommandReturnObject()
         self.target = None
 
     def handle_command(self, command):
@@ -57,12 +59,16 @@ class Debugger(object):
             raise RuntimeError('No %s found' % name)
 
         m = getattr(obj, action)
-        if m is None:
-            raise RuntimeError('No method %s found' % action)
+        if m is not None:
+            return m(*args)
 
-        return m(*args)
+        if name == 'debugger':
+            # self.debugger.HandleCommand(command)
+            self.res.clear()
+            self.interpreter.HandleCommand(action, self.res)
+            return self.res.Succeeded()
 
-        # self.debugger.HandleCommand(command)
+        raise RuntimeError('No method %s found for %s' % (action, name))
 
     def _add_breakpoint(self, bp=None):
         main_bp = self.target.BreakpointCreateByName(
