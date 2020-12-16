@@ -11,7 +11,8 @@ ${Me Dropdown Button}    xpath: //div[@class="el-dropdown"]/button
 ${Login Button}    xpath: //ul/li[contains(text(), "登陆")]
 
 ${Course Input}    xpath: //div[@class="el-message-box"]/descendant::div[@class="el-input"]/input
-${Select Course Input}    xpath: //div[@class="cb-card"]/descendant::input[@readonly="readonly"]
+${Select Course Input}    xpath: //div[@class="cb-card"]/descendant::input[@class="el-input__inner"]
+${Delete Course Button}    xpath: //div[@class="cb-navbar"]/descendant::button[@title="删除当前课程和相关的课程文件"]
 
 *** Keywords ***
 Verify Login Status
@@ -33,12 +34,18 @@ Current Course Should Be
     [Arguments]    ${Course Name}
     Element Attribute Value Should Be    ${Select Course Input}    value    ${Course Name}
 
+# 会使页面停在课程列表处
 Course Should Exist
     [Arguments]    ${Course Name}
     Click Element    ${Select Course Input}
     ${Course Li} =    Get WebElement    xpath: //div[@class="el-scrollbar"]/descendant::li[span="${Course Name}"]
     Page Should Contain Element    ${Course Li}
     [Return]    ${Course Li}
+
+Course Should Not Exist
+    [Arguments]    ${Course Name}
+    Click Element    ${Select Course Input}
+    
 
 Select Course
     [Arguments]    ${Course Name}
@@ -53,3 +60,14 @@ Add Course
     Input Text    ${Course Input}    ${Course Name}
     Click Button    ${Confirm To Add Course Button}
     Current Course Should Be    ${Course Name}
+
+Delete Course
+    [Arguments]    ${Course Name}
+    Select Course    ${Course Name}
+    Click Button    ${Delete Course Button}
+    Click Button    xpath: //div[@class="el-message-box"]/descendant::button[contains(span, "确定")]
+    Sleep    0.5s
+    Click Element    ${Select Course Input}
+    Page Should Not Contain Element    xpath: //div[@class="el-scrollbar"]/descendant::li[span="${Course Name}"]
+    Click Element    ${Select Course Input}
+

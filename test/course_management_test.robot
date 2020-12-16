@@ -35,10 +35,14 @@ add course
 add file
     Verify Login Status    ${User Name}
     Select Course    ${Test Course Name Glibc}
-    Element Should Be Enabled    ${Add File Button}
-    Wait Until Element Is Visible    ${Add File Button}    3s
-    Element Should Be Visible    ${Add File Button}
-    Click Element    ${Add File Button}
+#     Element Should Be Enabled    ${Add File Button}
+#     Wait Until Element Is Visible    ${Add File Button}    3s
+#     Element Should Be Visible    ${Add File Button}
+#     Click Element    ${Add File Button}
 
-# finally
-#     Close Browser
+delete course
+    Delete Course    ${Test Course Name Linux-core}
+    Delete Course    ${Test Course Name Glibc}
+
+finally
+    Close Browser
