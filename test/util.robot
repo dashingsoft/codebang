@@ -9,10 +9,15 @@ Library           SeleniumLibrary
 *** Variables ***
 ${Me Dropdown Button}    xpath: //div[@class="el-dropdown"]/button
 ${Login Button}    xpath: //ul/li[contains(text(), "登陆")]
+${Add Course Button}    xpath: //div/button[@title="新增课程"]
+${Add File Button}    xpath: //div/button[@title="新增文件"]
+${Confirm To Add Course Button}    xpath: //div[@class="el-message-box"]/descendant::button[contains(./span/text(), "确定")]
+${Confirm To Add File Button}    xpath: //div[@class="el-message-box"]/descendant::button[contains(./span/text(), "确定")]
 
-${Course Input}    xpath: //div[@class="el-message-box"]/descendant::div[@class="el-input"]/input
+${Add Course Input}    xpath: //div[@class="el-message-box"]/descendant::div[@class="el-input"]/input
 ${Select Course Input}    xpath: //div[@class="cb-card"]/descendant::input[@class="el-input__inner"]
 ${Delete Course Button}    xpath: //div[@class="cb-navbar"]/descendant::button[@title="删除当前课程和相关的课程文件"]
+${Add File Input}    xpath: //div[@class="el-message-box"]/descendant::div[@class="el-input"]/input
 
 *** Keywords ***
 Verify Login Status
@@ -57,9 +62,19 @@ Add Course
     [Arguments]    ${Course Name}
     Verify Login Status    ${User Name}
     Click Button    ${Add Course Button}
-    Input Text    ${Course Input}    ${Course Name}
+    Input Text    ${Add Course Input}    ${Course Name}
     Click Button    ${Confirm To Add Course Button}
     Current Course Should Be    ${Course Name}
+
+Add File
+    [Arguments]    ${File Name}
+    Verify Login Status    ${User Name}
+    Select Course    ${Test Course Name Glibc}
+    Mouse Down    ${Add File Button}
+    Mouse Up    ${Add File Button}
+    Input Text    ${Add File Input}    ${File Name}
+    Click Button    ${Confirm To Add File Button}
+    Wait Until Element Is Not Visible    ${Confirm To Add File Button}    1s
 
 Delete Course
     [Arguments]    ${Course Name}
