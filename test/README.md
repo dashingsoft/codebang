@@ -17,12 +17,23 @@ The general approach to install a browser driver is downloading a right driver, 
 
 [firefox geckodriver](https://npm.taobao.org/mirrors/geckodriver/)
 
-### 2. start codebang
+### 2. start codebang and future-server
 
-start codebang at any port you want(default: `8080`) and change directory to codebang in a terminal, then
+you have to start future-server at port `9092`. change directory to `future-server`,
+then
+```sh
+python3 manage.py runserver 9092
+```
+
+change directory to `codebang` in a terminal and start codebang at any port you want(default: `8080`), then
 ```sh
 npm run serve
 ```
+
+or you may want to use a shell script named `autostart.sh` for starting codebang and future-server automaticaly
+```sh
+./autostart.sh
+``` 
 
 ### 3. run tests
 create a directory for testing
