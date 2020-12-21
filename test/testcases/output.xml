@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<robot generator="Robot 3.2.2 (Python 3.6.9 on linux)" generated="20201221 21:31:40.723" rpa="false">
+<suite id="s1" name="Basic Test" source="/media/devecor/Data/clone/codebang/test/basic_test.robot">
+<test id="s1-t1" name="Initialize">
+<kw name="Open Codebang To Home Page" library="util">
+<kw name="Set Selenium Speed" library="SeleniumLibrary">
+<doc>Sets the delay that is waited after each Selenium command.</doc>
+<arguments>
+<arg>0</arg>
+</arguments>
+<status status="PASS" starttime="20201221 21:31:40.844" endtime="20201221 21:31:40.844"></status>
+</kw>
+<kw name="Open Browser" library="SeleniumLibrary">
+<doc>Opens a new browser instance to the optional ``url``.</doc>
+<arguments>
+<arg>${URL}</arg>
+<arg>${BROWSER}</arg>
+</arguments>
+<msg timestamp="20201221 21:31:40.844" level="INFO">Opening browser 'headlessfirefox' to base url 'http://localhost:8080/app'.</msg>
+<msg timestamp="20201221 21:31:40.845" level="INFO">Firefox driver log is always forced to to: /media/devecor/Data/clone/codebang/test/testcases/geckodriver-1.log</msg>
+<status status="PASS" starttime="20201221 21:31:40.844" endtime="20201221 21:31:43.313"></status>
+</kw>
+<kw name="Maximize Browser Window" library="SeleniumLibrary">
+<doc>Maximizes current browser window.</doc>
+<status status="PASS" starttime="20201221 21:31:43.313" endtime="20201221 21:31:43.316"></status>
+</kw>
+<kw name="Title Should Be" library="SeleniumLibrary">
+<doc>Verifies that the current page title equals ``title``.</doc>
+<arguments>
+<arg>codebang</arg>
+<arg>can not open codebang</arg>
+</arguments>
+<msg timestamp="20201221 21:31:43.318" level="INFO">Page title is 'codebang'.</msg>
+<status status="PASS" starttime="20201221 21:31:43.316" endtime="20201221 21:31:43.318"></status>
+</kw>
+<status status="PASS" starttime="20201221 21:31:40.843" endtime="20201221 21:31:43.319"></status>
+</kw>
+<status status="PASS" starttime="20201221 21:31:40.843" endtime="20201221 21:31:43.319" critical="yes"></status>
+</test>
+<test id="s1-t2" name="Login">
+<kw name="Login" library="util">
+<arguments>
+<arg>${User Name}</arg>
+<arg>${Password}</arg>
+</arguments>
+<kw name="Click Button" library="SeleniumLibrary">
+<doc>Clicks the button identified by ``locator``.</doc>
+<arguments>
+<arg>${Me Dropdown Button}</arg>
+</arguments>
+<msg timestamp="20201221 21:31:43.321" level="INFO">Clicking button 'xpath: //div[@class="el-dropdown"]/button'.</msg>
+<status status="PASS" starttime="20201221 21:31:43.321" endtime="20201221 21:31:43.573"></status>
+</kw>
+<kw name="Wait Until Element Is Visible" library="SeleniumLibrary">
+<doc>Waits until the element ``locator`` is visible.</doc>
+<arguments>
+<arg>${Login Button}</arg>
+<arg>0.5s</arg>
+</arguments>
+<status status="PASS" starttime="20201221 21:31:43.573" endtime="20201221 21:31:43.637"></status>
+</kw>
+<kw name="Click Element" library="SeleniumLibrary">
+<doc>Click the element identified by ``locator``.</doc>
+<arguments>
+<arg>${Login Button}</arg>
+</arguments>
+<msg timestamp="20201221 21:31:43.638" level="INFO">Clicking element 'xpath: //ul/li[contains(text(), "登陆")]'.</msg>
+<status status="PASS" starttime="20201221 21:31:43.637" endtime="20201221 21:31:43.906"></status>
+</kw>
+<kw name="Input Text" library="SeleniumLibrary">
+<doc>Types the given ``text`` into the text field identified by ``locator``.</doc>
+<arguments>
+<arg>${User Name Input}</arg>
+<arg>${User Name}</arg>
+</arguments>
+<msg timestamp="20201221 21:31:43.908" level="INFO">Typing text 'devecor' into text field 'xpath: //input[@placeholder="用户名/邮箱/手机号"]'.</msg>
+<status status="PASS" starttime="20201221 21:31:43.907" endtime="20201221 21:31:43.964"></status>
+</kw>
+<kw name="Input Password" library="SeleniumLibrary">
+<doc>Types the given password into the text field identified by ``locator``.</doc>
+<arguments>
+<arg>xpath: //div/input[@type="password"]</arg>
+<arg>${Password}</arg>
+</arguments>
+<msg timestamp="20201221 21:31:43.965" level="INFO">Typing password into text field 'xpath: //div/input[@type="password"]'.</msg>
+<msg timestamp="20201221 21:31:43.971" level="INFO">Temporally setting log level to: NONE</msg>
+<msg timestamp="20201221 21:31:43.986" level="INFO">Log level changed from NONE to INFO.</msg>
+<status status="PASS" starttime="20201221 21:31:43.964" endtime="20201221 21:31:43.986"></status>
+</kw>
+<kw name="Click Button" library="SeleniumLibrary">
+<doc>Clicks the button identified by ``locator``.</doc>
+<arguments>
+<arg>xpath: //div/button[span="登陆"]</arg>
+</arguments>
+<msg timestamp="20201221 21:31:43.986" level="INFO">Clicking button 'xpath: //div/button[span="登陆"]'.</msg>
+<status status="PASS" starttime="20201221 21:31:43.986" endtime="20201221 21:31:44.212"></status>
+</kw>
+<kw name="Verify Login Status" library="util">
+<arguments>
+<arg>${User Name}</arg>
+</arguments>
+<kw name="Wait Until Element Is Visible" library="SeleniumLibrary">
+<doc>Waits until the element ``locator`` is visible.</doc>
+<arguments>
+<arg>${Me Dropdown Button}</arg>
+<arg>1s</arg>
+</arguments>
+<status status="PASS" starttime="20201221 21:31:44.213" endtime="20201221 21:31:44.227"></status>
+</kw>
+<kw name="Sleep" library="BuiltIn">
+<doc>Pauses the test executed for the given time.</doc>
+<arguments>
+<arg>0.2s</arg>
+</arguments>
+<msg timestamp="20201221 21:31:44.428" level="INFO">Slept 200 milliseconds</msg>
+<status status="PASS" starttime="20201221 21:31:44.228" endtime="20201221 21:31:44.429"></status>
+</kw>
+<kw name="Click Button" library="SeleniumLibrary">
+<doc>Clicks the button identified by ``locator``.</doc>
+<arguments>
+<arg>${Me Dropdown Button}</arg>
+</arguments>
+<msg timestamp="20201221 21:31:44.429" level="INFO">Clicking button 'xpath: //div[@class="el-dropdown"]/button'.</msg>
+<kw name="Capture Page Screenshot" library="SeleniumLibrary">
+<doc>Takes a screenshot of the current page and embeds it into a log file.</doc>
+<msg timestamp="20201221 21:31:44.703" level="INFO" html="yes">&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td colspan="3"&gt;&lt;a href="selenium-screenshot-1.png"&gt;&lt;img src="selenium-screenshot-1.png" width="800px"&gt;&lt;/a&gt;</msg>
+<status status="PASS" starttime="20201221 21:31:44.480" endtime="20201221 21:31:44.703"></status>
+</kw>
+<msg timestamp="20201221 21:31:44.704" level="FAIL">ElementClickInterceptedException: Message: Element &lt;button class="el-button el-icon-user el-button--text el-dropdown-selfdefine" type="button"&gt; is not clickable at point (1335,29) because another element &lt;div class="el-dialog__wrapper dialog-fade-leave-active dialog-fade-leave-to"&gt; obscures it
+</msg>
+<status status="FAIL" starttime="20201221 21:31:44.429" endtime="20201221 21:31:44.704"></status>
+</kw>
+<status status="FAIL" starttime="20201221 21:31:44.212" endtime="20201221 21:31:44.704"></status>
+</kw>
+<status status="FAIL" starttime="20201221 21:31:43.320" endtime="20201221 21:31:44.704"></status>
+</kw>
+<status status="FAIL" starttime="20201221 21:31:43.319" endtime="20201221 21:31:44.705" critical="yes">ElementClickInterceptedException: Message: Element &lt;button class="el-button el-icon-user el-button--text el-dropdown-selfdefine" type="button"&gt; is not clickable at point (1335,29) because another element &lt;div class="el-dialog__wrapper dialog-fade-leave-active dialog-fade-leave-to"&gt; obscures it
+</status>
+</test>
+<test id="s1-t3" name="Add Course">
+<tags>
+<tag>robot:exit</tag>
+</tags>
+<status status="FAIL" starttime="20201221 21:31:44.705" endtime="20201221 21:31:44.705" critical="yes">Critical failure occurred and exit-on-failure mode is in use.</status>
+</test>
+<test id="s1-t4" name="Add File">
+<tags>
+<tag>robot:exit</tag>
+</tags>
+<status status="FAIL" starttime="20201221 21:31:44.706" endtime="20201221 21:31:44.706" critical="yes">Critical failure occurred and exit-on-failure mode is in use.</status>
+</test>
+<test id="s1-t5" name="Delete Course">
+<tags>
+<tag>robot:exit</tag>
+</tags>
+<status status="FAIL" starttime="20201221 21:31:44.706" endtime="20201221 21:31:44.707" critical="yes">Critical failure occurred and exit-on-failure mode is in use.</status>
+</test>
+<test id="s1-t6" name="Finally">
+<tags>
+<tag>robot:exit</tag>
+</tags>
+<status status="FAIL" starttime="20201221 21:31:44.707" endtime="20201221 21:31:44.707" critical="yes">Critical failure occurred and exit-on-failure mode is in use.</status>
+</test>
+<doc>Basic business process test using SeleniumLibrary.</doc>
+<status status="FAIL" starttime="20201221 21:31:40.724" endtime="20201221 21:31:44.708"></status>
+</suite>
+<statistics>
+<total>
+<stat pass="1" fail="5">Critical Tests</stat>
+<stat pass="1" fail="5">All Tests</stat>
+</total>
+<tag>
+<stat pass="1" fail="1" info="combined" combined="NOT robot:exit">NOT robot:exit</stat>
+<stat pass="0" fail="4">robot:exit</stat>
+</tag>
+<suite>
+<stat pass="1" fail="5" id="s1" name="Basic Test">Basic Test</stat>
+</suite>
+</statistics>
+<errors>
+</errors>
+</robot>

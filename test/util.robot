@@ -8,7 +8,7 @@ Library           SeleniumLibrary
 
 *** Variables ***
 ${URL}                             http://localhost:8080/app
-${BROWSER}                         headlesschrome
+${BROWSER}                         headlessfirefox
 
 ${User Name}                       devecor
 ${Password}                        t
@@ -39,6 +39,7 @@ Open Codebang To Home Page
 Verify Login Status
     [Arguments]    ${User Name}
     Wait Until Element Is Visible    ${Me Dropdown Button}    1s
+    Sleep    0.2s
     Click Button    ${Me Dropdown Button}
     Wait Until Element Contains    ${Login Button}    登陆为 ${User Name}    1s
 
@@ -100,6 +101,7 @@ Delete Course
     Click Button    ${Delete Course Button}
     Click Button    xpath: //div[@class="el-message-box"]/descendant::button[contains(span, "确定")]
     Wait Until Element Is Visible    ${Select Course Input}
+    Sleep    0.2s
     Click Element    ${Select Course Input}
     Page Should Not Contain Element    xpath: //div[@class="el-scrollbar"]/descendant::li[span="${Course Name}"]
     Click Element    ${Select Course Input}
