@@ -3,12 +3,13 @@ Documentation     Basic business process test using SeleniumLibrary.
 Library           SeleniumLibrary
 Resource          util.robot
 
+
 *** Test Cases ***
 Initialize
     Open Codebang To Home Page
 
 Login
-    Login    ${User Name}    ${Password}
+    Login Should Success    ${User Name}    ${Password}
 
 Add Course
     Add Course    ${Test Course Name Glibc}
