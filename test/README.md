@@ -30,30 +30,35 @@ change directory to `codebang` in a terminal and start codebang at any port you 
 npm run serve
 ```
 
-or you may want to use a shell script named `autostart.sh` for starting codebang and future-server automaticaly
+or you may want to use a shell script named `autostart.sh` for starting codebang and future-server automaticaly(just for bash with gnome)
 ```sh
 ./autostart.sh
 ``` 
 
 ### 3. run tests
-create a directory for testing
+create a directory for testing log
 ```sh
 mkdir test-results
-
-cd test-results
 ```
 
-run any of one test case. for ecample
+run any of one test suite which contains some test cases. for ecample
 ```sh
-robot -X -d ./test-results course_management_test.robot
+cd codebang/test
+robot -X -d ./test-results login
 ```
 
 or run the whole test suite
 ```sh
-robot -d test-results .
+robot -X -d test-results .
 ```
 
 ## Test cases List
+
+### Login
+* Login With Valid User
+* Login With Invalid Username
+* Login With Invalid Password
+* Login With Invalid Username And Password
 
 ## Reference
 
