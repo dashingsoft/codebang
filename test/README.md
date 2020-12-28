@@ -5,7 +5,7 @@ Here are robot test cases to verify the main functions of `codebang`, each test 
 In order to run them automatically, first install RobotFramework and SeleniumLibrary by `pip`
 
 ```sh
-python3 -m pip install robotframework robotframework-seleniumlibrary
+python3 -m pip install robotframework robotframework-SeleniumLibrary
 ```
 
 then, please complete the following preparations step by step
@@ -19,7 +19,7 @@ The general approach to install a browser driver is downloading a right driver, 
 
 ### 2. start codebang and future-server
 
-you have to start future-server at port `9092`. change directory to `future-server`,
+you have to start future-server at port `9092`. change directory to `future-server` in a terminal,
 then
 ```sh
 python3 manage.py runserver 9092
@@ -38,19 +38,24 @@ or you may want to use a shell script named `autostart.sh` for starting codebang
 ### 3. run tests
 create a directory for testing
 ```sh
-mkdir testcases
+mkdir test-results
 
-cd testcases
+cd test-results
 ```
 
 run any of one test case. for ecample
 ```sh
-robot -d ./testcases course_management_test.robot
+robot -X -d ./test-results course_management_test.robot
 ```
 
 or run the whole test suite
 ```sh
-robot -d testcases .
+robot -d test-results .
 ```
 
 ## Test cases List
+
+## Reference
+
+* [robotframework](https://robotframework.org/#examples)
+* [SeleniumLibrary](https://robotframework.org/SeleniumLibrary/)
