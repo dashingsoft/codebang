@@ -8,8 +8,8 @@ Library           SeleniumLibrary
 
 
 *** Variables ***
-${URL}                             http://localhost:8080/app
-${BROWSER}                         chrome
+${URL}            http://localhost:8080/app
+${BROWSER}        chrome
 
 
 *** Keywords ***
@@ -18,3 +18,6 @@ Open Codebang To Home Page
     Open Browser    ${URL}    ${BROWSER}
     Maximize Browser Window
     Title Should Be  codebang    can not open codebang
+
+Wait Until Animation Is Finished
+    Sleep    0.5s

@@ -1,7 +1,7 @@
 *** Settings ***
 Documentation    the test cases for login
-Library          SeleniumLibrary
 Resource         login_action.robot
+Test Teardown    Logout
 
 
 *** Variables ***
@@ -13,6 +13,7 @@ ${Invalid User Password}    wrong password
 
 *** Test Cases ***
 Login With Valid User
+    [Tags]    normal
     Open Login Dialog
     Input User Name    ${Valid User Name}
     Input User Password    ${Valid Password}
@@ -20,6 +21,7 @@ Login With Valid User
     Login Should Succeed
 
 Login With Invalid Username
+    [Tags]    abnormal
     Open Login Dialog
     Input User Name    ${Invalid User Name}
     Input User Password    ${Valid Password}
@@ -27,6 +29,7 @@ Login With Invalid Username
     Login Should Fail
 
 Login With Invalid Password
+    [Tags]    abnormal
     Open Login Dialog
     Input User Name    ${Valid User Name}
     Input User Password    ${Invalid User Password}
@@ -34,6 +37,7 @@ Login With Invalid Password
     Login Should Fail
 
 Login With Invalid Username And Password
+    [Tags]    abnormal
     Open Login Dialog
     Input User Name    ${Invalid User Name}
     Input User Password    ${Invalid User Password}

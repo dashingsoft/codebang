@@ -1,53 +1,52 @@
-# Codebang Test Cases
-Here are robot test cases to verify the main functions of `codebang`, each test case has one `.robot` file. These test cases also could be as a guide for end users to understand how to use codebang.
+# Codebang Tests
+This folder contains the various test runners for **codebang**.
 
-## Let's start!
-In order to run them automatically, first install RobotFramework and SeleniumLibrary by `pip`
+## Requirements
 
+### 1. Install the dependencis
+Before running the test, install the dependencies:
 ```sh
 python3 -m pip install robotframework robotframework-SeleniumLibrary
 ```
 
-then, please complete the following preparations step by step
+### 2. Install webDirvers
+The general approach to install a browser driver is downloading a right driver, such as chromedriver for Chrome, and placing it into a directory that is in **PATH**. Drivers for different browsers can be found as follows
 
-### 1. install webDirvers
-The general approach to install a browser driver is downloading a right driver, such as chromedriver for Chrome, and **placing it into a directory that is in** `path`. here are two fast links about chrome and firefox drivers in `npm.taobao.org` for chinese users.
+* [ChromeDriver for google Chrome](https://npm.taobao.org/mirrors/chromedriver/)
 
-[chrome webdriver](https://npm.taobao.org/mirrors/chromedriver/)
+* [Geckodriver for firefox](https://npm.taobao.org/mirrors/geckodriver/)
 
-[firefox geckodriver](https://npm.taobao.org/mirrors/geckodriver/)
+### 3. Start server
 
-### 2. start codebang and future-server
-
-you have to start future-server at port `9092`. change directory to `future-server` in a terminal,
+You have to start future-server at port `9092`. Change directory to `future-server` in a terminal,
 then
 ```sh
 python3 manage.py runserver 9092
 ```
 
-change directory to `codebang` in a terminal and start codebang at any port you want(default: `8080`), then
+Change directory to `codebang` in a terminal and start codebang at any port you expected(default: `8080`), then
 ```sh
 npm run serve
 ```
 
-or you may want to use a shell script named `autostart.sh` for starting codebang and future-server automaticaly(just for bash with gnome)
+You may want to use a shell script named `autostart.sh` for starting codebang and future-server automaticaly.
 ```sh
 ./autostart.sh
 ``` 
 
-### 3. run tests
-create a directory for testing log
+## Run tests
+Create a directory for test log files
 ```sh
 mkdir test-results
 ```
 
-run any of one test suite which contains some test cases. for ecample
+Run any of one test suite which contains some test cases. for ecample
 ```sh
 cd codebang/test
-robot -X -d ./test-results login
+robot -X -d test-results --suite login_suite code_manager_test
 ```
 
-or run the whole test suite
+Or run the whole test suite
 ```sh
 robot -X -d test-results .
 ```
@@ -59,8 +58,3 @@ robot -X -d test-results .
 * Login With Invalid Username
 * Login With Invalid Password
 * Login With Invalid Username And Password
-
-## Reference
-
-* [robotframework](https://robotframework.org/#examples)
-* [SeleniumLibrary](https://robotframework.org/SeleniumLibrary/)

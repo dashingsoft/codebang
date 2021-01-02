@@ -59,6 +59,14 @@ Is Login
     Click Button    ${Me Dropdown Button}
     [Return]    ${Return Value}
 
+Login
+    [Arguments]    ${User Name}    ${Password}
+    Open Login Dialog
+    Input User Name    ${User Name}
+    Input User Password    ${Password}
+    Confirm To Login
+    Login Should Succeed
+
 Logout
     ${Is Login} =    Is Login
     Return From Keyword If    not ${Is Login}    ${None}
