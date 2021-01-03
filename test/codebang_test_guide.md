@@ -4,7 +4,7 @@
 This is a tutorial for developer to prefect test cases of codebang. There is a [specification](#Specification) that we must follow
 
 ### Prerequisites
-[See README](README)
+See [README](README.md)
 
 ### Specification
 
@@ -46,9 +46,9 @@ This is a tutorial for developer to prefect test cases of codebang. There is a [
 #### Structure
 * a test suite of codebang with fandamental capability created from only **two** files: 
   * Resource file: `anction.robot`
-  * Test case file: `suite.robot`
+  * Test case file: `case.robot`
 
-  Any costomized `keyword` about the current suite should be defined in Resource file `anction.robot`. All cases for the current suite within test case file `suite.robot` are expected.
+  Any costomized `keyword` about the current suite should be defined in Resource file `anction.robot`. All cases for the current suite within test case file `case.robot` are expected.
 * A high level suite of codebang created from a directory with a initialization file. An initialization file name must always be of the format `__init__.ext`, where the extension must be one of the supported file formats (typically `__init__.robot`).The main usage for initialization files is specifying test suite related settings in global. For example
   ```
   *** Settings ***

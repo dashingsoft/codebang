@@ -43,7 +43,7 @@ mkdir test-results
 Run any test suite which contains some test cases
 ```sh
 cd codebang/test
-robot -X -d test-results --suite login_suite code_manager_test
+robot -X -d test-results --suite login_suite code_manager
 ```
 
 Run one test case that is in a test suite
@@ -61,18 +61,8 @@ Run the whole test suite
 robot -X -d test-results .
 ```
 
-## Test cases List
+## Test cases
+See [Test Cases List](codebang_test_cases.md)
 
-### Login
-* Login With Valid User
-* Login With Invalid Username
-* Login With Invalid Password
-* Login With Invalid Username And Password
-
-### Course
-* Add Course After Login
-* Add Course Before Login
-* Delete Course After Login
-* Rename Course After Login
-* Course Renaming Or Deletion Before Login
-* Switch Another Course After Login
+## Test guide
+[Codebang Test Guide For Developer](codebang_test_guide.md)
