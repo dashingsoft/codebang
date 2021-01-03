@@ -13,12 +13,14 @@ ${Another Course Name}    linux-core
 
 *** Test Cases ***
 Add Course After Login
-    [Tags]    normal
+    [Tags]    main    normal
     Click Add Course Button
     Input Course Name    ${Course Name}
     Confirm To Add Course
     Current Course Should Be    ${Course Name}
-    [Teardown]    Run Keywords    Delete Course    ${Course Name}    AND    Logout
+    [Teardown]    Run Keywords
+    ...           Delete Course    ${Course Name}    AND
+    ...           Logout
 
 Add Course Before Login
     [Tags]    abnormal
@@ -28,7 +30,7 @@ Add Course Before Login
     [Teardown]
 
 Delete Course After Login
-    [Tags]    normal
+    [Tags]    main    normal
     Add Course    ${Course Name}
     Select Course    ${Course Name}
     Click Button To Delete Course
@@ -37,7 +39,7 @@ Delete Course After Login
     Course Should Be Deleted    ${Course Name}
 
 Rename Course After Login
-    [Tags]    normal
+    [Tags]    main normal
     Add Course    ${Course Name}
     Select Course    ${Course Name}
     Click Button To Rename Course

@@ -13,7 +13,7 @@ ${Invalid User Password}    wrong password
 
 *** Test Cases ***
 Login With Valid User
-    [Tags]    normal
+    [Tags]    main    normal
     Open Login Dialog
     Input User Name    ${Valid User Name}
     Input User Password    ${Valid Password}

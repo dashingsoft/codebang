@@ -40,13 +40,23 @@ Create a directory for test log files
 mkdir test-results
 ```
 
-Run any of one test suite which contains some test cases. for ecample
+Run any test suite which contains some test cases
 ```sh
 cd codebang/test
 robot -X -d test-results --suite login_suite code_manager_test
 ```
 
-Or run the whole test suite
+Run one test case that is in a test suite
+```sh
+robot -X -d test-results --suite login_suite --test login_with_valid_user
+```
+
+Run the smoke test with `-i tag`
+```sh
+robot -X -d test-results -i normal .
+```
+
+Run the whole test suite
 ```sh
 robot -X -d test-results .
 ```
@@ -58,3 +68,11 @@ robot -X -d test-results .
 * Login With Invalid Username
 * Login With Invalid Password
 * Login With Invalid Username And Password
+
+### Course
+* Add Course After Login
+* Add Course Before Login
+* Delete Course After Login
+* Rename Course After Login
+* Course Renaming Or Deletion Before Login
+* Switch Another Course After Login

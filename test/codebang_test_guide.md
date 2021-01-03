@@ -59,9 +59,18 @@ This is a tutorial for developer to prefect test cases of codebang. There is a [
   Suite Setup       Open Codebang To Home Page
   Suite Teardown    Close Browser
   ```
-### Tags
+#### Keywords, cases and documentions
+See [How to write good test cases using Robot Framework](https://github.com/robotframework/HowToWriteGoodTestCases/blob/master/HowToWriteGoodTestCases.rst)
+
+#### Tags
+In order to costomize **smoke test**, we should create test cases with `Tags`.A test case can specified with multiple tags.
+* Use the `main` for the most important test case, such as login, add course etc.
+* Use the `normal` for legal operations
+* Use the `abnormal` for iilegal operations
+* Continually updating...
 
 ## Reference
 
 * [Robot Framework User Guide](http://robotframework.org/robotframework/latest/RobotFrameworkUserGuide.html)
 * [The home page of SeleniumLibrary](https://robotframework.org/SeleniumLibrary/)
+* [How to write good test cases using Robot Framework](https://github.com/robotframework/HowToWriteGoodTestCases/blob/master/HowToWriteGoodTestCases.rst)
