@@ -15,6 +15,9 @@ ${Select Course Input}                xpath: //div[@class="cb-card"]/descendant:
 
 ${Can Not Add Course Alert}           xpath: //div[@role="alert"]/descendant::p[contains(text(), "未登陆用户不能创建课程")]
 
+${Default Course Name}                glibc
+
+
 *** Keywords ***
 Click Add Course Button
     Click Button    ${Add Course Button}
@@ -97,3 +100,9 @@ Delete Course
     Click Element    ${Select Course Input}
     Page Should Not Contain Element    xpath: //div[@class="el-scrollbar"]/descendant::li[span="${Course Name}"]
     Click Element    ${Select Course Input}
+
+Add Default Course
+    Add Course    ${Default Course Name}
+
+Delete Default Course
+    Delete Course    ${Default Course Name}

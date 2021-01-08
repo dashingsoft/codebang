@@ -15,6 +15,9 @@ ${Login Dialog}                    xpath: //div[@class="el-dialog__wrapper" and 
 ${User Name Input}                 xpath: //input[@placeholder="用户名/邮箱/手机号"]
 ${User Password Input}             xpath: //div/input[@type="password"]
 
+${Default User Name}               devecor
+${Default User Password}           t
+
 
 *** Keywords ***
 Open Login Dialog
@@ -76,3 +79,6 @@ Logout
     Wait Until Element Is Not Visible     ${Logout Button}    0.5s
     ${Is Login} =    Is Login
     Run Keyword If    ${Is Login}    Fail    "Logout failed"
+
+Login With Default User
+    Login    ${Default User Name}    ${Default User Password}
