@@ -13,3 +13,7 @@
 * Rename Course After Login
 * Course Renaming Or Deletion Before Login
 * Switch Another Course After Login
+
+### File
+* Add File Before Login
+* Add File After Login
