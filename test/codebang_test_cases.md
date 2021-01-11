@@ -17,3 +17,5 @@
 ### File
 * Add File Before Login
 * Add File After Login
+* Edit File
+* Save File After Login
