@@ -49,8 +49,6 @@ mount -t 9p -o trans=virtio hostfolder /opt/codebang/data/users
 ifconfig eth0 10.0.2.15 netmask 255.255.255.0 up
 route add default gateway 10.0.2.2 eth0
 /usr/local/bin/gdbserver --multi 10.0.2.15:20600 &
-/usr/local/bin/gdbserver --multi 10.0.2.15:20601 &
-/usr/local/bin/gdbserver --multi 10.0.2.15:20602 &
 EOF
 chmod 755 $rootfs/etc/init.d/rcS
 
