@@ -1,5 +1,5 @@
 #! /bin/bash
-port=$1
+port=${1:-20600}
 gdb-multiarch \
-    -ex "target extended-remote localhost:$port" \
-    -ex "script /opt/codebang/bin/cbextension.py"
+    -ex "script /opt/codebang/bin/cbextension.py" \
+    -ex "target extended-remote localhost:$port"

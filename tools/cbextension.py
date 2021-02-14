@@ -13,8 +13,8 @@ except ImportError:
     from urllib import urlencode
 
 
-CBHOST = 'localhost', 'localhost'
-CBPORT = 8020, 8021
+CBHOST = 'localhost'
+CBPORT = 8020
 
 
 class CBRequestHandler(SimpleXMLRPCRequestHandler):
@@ -65,7 +65,7 @@ class CBProxyCommand(object):
             return ret
 
 
-def cb_start_server(host=CBHOST[1], port=CBPORT[1]):
+def cb_start_server(host=CBHOST, port=CBPORT):
     server = SimpleXMLRPCServer((host, port),
                                 requestHandler=CBRequestHandler,
                                 allow_none=True)
@@ -88,7 +88,7 @@ def cb_exit_handler(event):
     cb_stop_server()
 
 
-def cb_send_request(args, host=CBHOST[0], port=CBPORT[0]):
+def cb_send_request(args, host, port):
     data = urlencode(args)
     if hasattr(data, 'encode'):
         data = data.encode('ascii')
