@@ -15,7 +15,7 @@ const REFRESH_TOKEN_KEY = 'REFRESH_TOKEN'
 // const clientId = 'rgt9yKrM82ACFiKLW2aIwxYUCIUV8ggx2OH5hvu8'
 // const clientSecret = 'hiWi4Q8k4TR1aAF8PGtqjL7DiY15gBFXjYQ9UM5F3EV5mneJbo88LlXqst0PcfpYVhPQyKc1jjlICggI0otTjOv6zoP89Q0uBNoLsEqkRVmi2G4w5Snn9dBADHx7UxaT'
 
-const serverUrl = 'https://cb.dashingsoft.com'
+const serverUrl = 'https://cb.dashingsoft.com/api/v1'
 const clientId = 'PetTAmGzfinaiKDcr8wAfuq2IGqYv2TfWBHuou2F'
 const clientSecret = 'SLc0LAGCyPQ291V2f3XSpK1xyBde01SHy9hZ5l2FQbrEbd17J9ZSlT8VXDWpsHMre4JqA7F8Olr6SDOQuR5Ul8D7U5PaFopiARASA8vIudRBsh2RAWqfO6Iu14Dtc5bq'
 
@@ -271,35 +271,35 @@ export default new Vue({
             revoke_token(callback)
         },
         getLogon: function () {
-            const api = '/api/users/info/'
+            const api = '/users/info/'
             this.sendRequest(api, {}, 'api-get-logon', {silent: true})
         },
         newCourse: function (course) {
-            const api = '/api/courses/'
+            const api = '/courses/'
             this.sendRequest(api, { data: course }, 'api-new-course')
         },
         listCourses: function () {
-            const api = '/api/courses/'
+            const api = '/courses/'
             this.sendRequest(api, {}, 'api-list-courses')
         },
         getCourse: function (course) {
-            const api = '/api/courses/' + course.id
+            const api = '/courses/' + course.id
             this.sendRequest(api, {}, 'api-get-course')
         },
         updateCourse: function (course) {
-            const api = '/api/courses/' + course.id
+            const api = '/courses/' + course.id
             this.sendRequest(api, { data: course }, 'api-update-course')
         },
         removeCourse: function (course) {
-            const api = '/api/courses/' + course.id
+            const api = '/courses/' + course.id
             this.sendRequest(api, { data: course }, 'api-remove-course')
         },
         listCourseItems: function (course) {
-            const api = '/api/courses/' + course.id + '/items/'
+            const api = '/courses/' + course.id + '/items/'
             this.sendRequest(api, {}, 'api-list-course-items')
         },
         newCoursework: function (filename, content, course) {
-            const api = '/api/courseworks/'
+            const api = '/courseworks/'
             let files = []
             files.push(['source', filename, content])
             let args = []
@@ -308,27 +308,27 @@ export default new Vue({
             this.sendRequest(api, make_multipart_data(args, files), 'api-new-coursework')
         },
         getCoursework: function (coursework) {
-            const api = '/api/courseworks/' + coursework.id
+            const api = '/courseworks/' + coursework.id
             this.sendRequest(api, {}, 'api-get-coursework')
         },
         listCourseworks: function () {
-            const api = '/api/courseworks/'
+            const api = '/courseworks/'
             this.sendRequest(api, {}, 'api-list-courseworks')
         },
         updateCoursework: function (coursework) {
-            const api = '/api/courseworks/' + coursework.id
+            const api = '/courseworks/' + coursework.id
             this.sendRequest(api, { data: coursework }, 'api-update-coursework')
         },
         removeCoursework: function (coursework) {
-            const api = '/api/courseworks/' + coursework.id
+            const api = '/courseworks/' + coursework.id
             this.sendRequest(api, { data: coursework }, 'api-remove-coursework')
         },
         getCourseworkContent: function (coursework) {
-            const api = '/api/courseworks/' + coursework.id + '/content/'
+            const api = '/courseworks/' + coursework.id + '/content/'
             this.sendRequest(api, { responseType: 'blob' }, 'api-get-coursework-content')
         },
         updateCourseworkContent: function (coursework, content) {
-            const api = '/api/courseworks/' + coursework.id
+            const api = '/courseworks/' + coursework.id
             let files = []
             files.push(['source', coursework.name, content])
             let args = []
@@ -375,7 +375,7 @@ export default new Vue({
                         this.$emit( 'api-build-coursework', result )
                 } )
 
-                const api = '/api/courseworks/' + coursework.id + '/build/'
+                const api = '/courseworks/' + coursework.id + '/build/'
                 this.sendRequest(api, { data: coursework }, 'api-build')
 
             }.bind( this )
@@ -407,11 +407,11 @@ export default new Vue({
             } ).bind( this )
 
             coursework.state = BUILDING
-            const api = '/api/courseworks/' + coursework.id + '/rebuild/'
+            const api = '/courseworks/' + coursework.id + '/rebuild/'
             this.sendRequest(api, { data: coursework }, 'api-rebuild')
         },
         taskCoursework: function (coursework) {
-            const api = '/api/courseworks/' + coursework.id + '/result/'
+            const api = '/courseworks/' + coursework.id + '/result/'
             this.sendRequest(api, { data: coursework }, 'api-task')
         },
     }
