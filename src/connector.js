@@ -11,9 +11,13 @@ const REFRESH_TOKEN_KEY = 'REFRESH_TOKEN'
 // const clientId = '0gvr1GFNpCy9fSpxsKHPdUPUu7ZSCQS76zc8kAgl'
 // const clientSecret = 'dazoA4IhCGrWrkh2rA02FE1qm3AVWdAz9qKqSZDLAD22xWiVYsEeMtq2BmqVY748U8Qw9jecBo9BHYYG3nZDgOUUwaEFjjDir1VX25ejnCvEcwdzV3Wt2Rxcnt45lxaN'
 
-const serverUrl = 'https://codebang.dashingsoft.com'
-const clientId = 'rgt9yKrM82ACFiKLW2aIwxYUCIUV8ggx2OH5hvu8'
-const clientSecret = 'hiWi4Q8k4TR1aAF8PGtqjL7DiY15gBFXjYQ9UM5F3EV5mneJbo88LlXqst0PcfpYVhPQyKc1jjlICggI0otTjOv6zoP89Q0uBNoLsEqkRVmi2G4w5Snn9dBADHx7UxaT'
+// const serverUrl = 'https://codebang.dashingsoft.com'
+// const clientId = 'rgt9yKrM82ACFiKLW2aIwxYUCIUV8ggx2OH5hvu8'
+// const clientSecret = 'hiWi4Q8k4TR1aAF8PGtqjL7DiY15gBFXjYQ9UM5F3EV5mneJbo88LlXqst0PcfpYVhPQyKc1jjlICggI0otTjOv6zoP89Q0uBNoLsEqkRVmi2G4w5Snn9dBADHx7UxaT'
+
+const serverUrl = 'https://cb.dashingsoft.com'
+const clientId = 'PetTAmGzfinaiKDcr8wAfuq2IGqYv2TfWBHuou2F'
+const clientSecret = 'SLc0LAGCyPQ291V2f3XSpK1xyBde01SHy9hZ5l2FQbrEbd17J9ZSlT8VXDWpsHMre4JqA7F8Olr6SDOQuR5Ul8D7U5PaFopiARASA8vIudRBsh2RAWqfO6Iu14Dtc5bq'
 
 // Fix this issue:
 //   Do not access Object.prototype method ‘hasOwnProperty’ from target object no-prototype-builtins
