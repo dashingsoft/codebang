@@ -1,102 +1,72 @@
+# -*- coding: utf-8 -*-
+'''GDB Extension
+
+'''
 import gdb
-import threading
 
-try:
-    from xmlrpc.server import SimpleXMLRPCServer
-    from xmlrpc.server import SimpleXMLRPCRequestHandler
-    from urllib.request import urlopen
-    from urllib.parse import urlencode
-except ImportError:
-    from SimpleXMLRPCServer import SimpleXMLRPCServer
-    from SimpleXMLRPCServer import SimpleXMLRPCRequestHandler
-    from urllib import urlopen
-    from urllib import urlencode
+from urllib.request import urlopen
+from urllib.parse import urlencode
 
 
-CBHOST = 'localhost'
-CBPORT = 8020
+CBURL = 'http://localhost:20929/api/v1/event/gdb/'
 
 
-class CBRequestHandler(SimpleXMLRPCRequestHandler):
-    rpc_paths = ('/RPC2',)
+def execmd(*cmdlist):
+
+    def _runner():
+        for cmd in cmdlist:
+            gdb.execute(cmd)
+
+    gdb.post_event(_runner)
 
 
-class CBRunner(object):
+def startprog(filename):
 
-    def __init__(self, tid, cmd, args):
-        self._tid = tid
-        self._cmd = cmd
-        self._args = args
+    def _runner():
+        i = gdb.selected_inferior()
+        if i.is_valid() and i.progspace.filename is None:
+            gdb.execute('set remote exec-file ' + filename)
+        else:
+            res = gdb.execute('add-inferior -no-connection', False, True)
+            n = res.split()[-1]
+            gdb.execute('inferior ' + n)
+            gdb.execute('set remote exec-file ' + filename)
+        cb_notify_event({
+            'event': 'new_inferior',
+            'num': i.num,
+            'filename': filename
+        })
 
-    def __call__(self):
-        m = getattr(gdb, self._cmd)
-        r = CBProxyCommand.results.get(self._tid, {})
-        if m is None:
-            r['status'] = -1
-            r['error'] = 'Unknown command "%s"' % self._cmd
-            return
-
-        try:
-            r['value'] = m() if self._args is None else m(*self._args)
-            r['status'] = 0
-        except Exception as e:
-            r['status'] = 1
-            r['error'] = str(e)
+    gdb.post_event(_runner)
 
 
-class CBProxyCommand(object):
-
-    counter = 0
-    results = {}
-
-    def execute(self, cmd, args=None):
-        self.counter += 1
-        self.results[self.counter] = {'status': None}
-        gdb.post_event(CBRunner(self.counter, cmd, args))
-        return self.counter
-
-    def result(self, tid=None):
-        if tid is None:
-            tid = self.counter
-        if tid in self.results:
-            ret = self.results[tid]
-            if ret['status'] is not None:
-                self.results.pop(tid)
-            return ret
+def cb_new_inferior_handler(event):
+    event.inferior
 
 
-def cb_start_server(host=CBHOST, port=CBPORT):
-    server = SimpleXMLRPCServer((host, port),
-                                requestHandler=CBRequestHandler,
-                                allow_none=True)
-    server.register_introspection_functions()
-    server.register_instance(CBProxyCommand())
-    threading.Thread(target=server.serve_forever).start()
-    return server
+def cb_exited_handler(event):
+    event.inferior, event.exit_code
 
 
-def cb_stop_server():
-    if hasattr(gdb, 'cbsvr'):
-        gdb.cbsvr.shutdown()
-        gdb.cbsvr.server_close()
-        delattr(gdb, 'cbsvr')
+def cb_stop_handler(event):
+    event.stop_signal, event.breakpoints
 
 
-def cb_exit_handler(event):
-    # print "event type: exit"
-    # print "exit code: %d" % (event.exit_code)
-    cb_stop_server()
+def cb_cont_handler(event):
+    event.inferior_thread
 
 
-def cb_send_request(args, host, port):
+def cb_notify_event(args):
     data = urlencode(args)
-    if hasattr(data, 'encode'):
-        data = data.encode('ascii')
-    uri = 'http://%s:%s/gdb/' % (host, port)
-    with urlopen(uri, data) as f:
-        return f.read().decode('utf-8')
+    r = urlopen(CBURL, data.encode('ascii'))
+    if r.status == 200:
+        return r.read().decode('utf-8')
 
 
-if not hasattr(gdb, 'cbsvr'):
-    gdb.cbsvr = cb_start_server()
-    gdb.events.exited.connect(cb_exit_handler)
+#
+# Hook event
+#
+gdb.events.new_inferior.connect(cb_new_inferior_handler)
+gdb.events.exited.connect(cb_exited_handler)
+gdb.events.stop.connect(cb_stop_handler)
+gdb.events.cont.connect(cb_cont_handler)
