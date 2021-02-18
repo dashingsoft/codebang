@@ -5,8 +5,13 @@ busybox="busybox-1.32.1"
 rm -rf $rootfs
 mkdir $rootfs
 
-cp -a /usr/aarch64-linux-gnu/lib $rootfs
 cp $busybox/_install/* rootfs/ -rfa
+
+# Runtime lib, for example, libc6.so, ld.so
+# cp -a /usr/aarch64-linux-gnu/lib $rootfs
+# Runtime lib with debug symbol
+mkdir $rootfs/lib
+cp -a /usr/aarch64-linux-gnu/lib/debug/lib/aarch64-linux-gnu/* $rootfs/lib
 
 mkdir $rootfs/proc
 mkdir $rootfs/mnt
