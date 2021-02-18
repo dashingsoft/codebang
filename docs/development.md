@@ -146,3 +146,10 @@ qemu-system-aarch64 -machine virt -cpu cortex-a57 -machine type=virt -nographic 
     gdb-multiarch /opt/codebang/share/a.out
     (gdb) target remote localhost:20600
     (gdb) c
+
+## glibc arm64 调试
+
+安装包含调试符号的开发包
+
+    apt install libc6-dev-arm64-cross libc6-dbg-arm64-cross
+    dpkg -L libc6-dbg-arm64-cross
