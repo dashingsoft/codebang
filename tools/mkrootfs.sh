@@ -7,11 +7,9 @@ mkdir $rootfs
 
 cp $busybox/_install/* rootfs/ -rfa
 
-# Runtime lib, for example, libc6.so, ld.so
-# cp -a /usr/aarch64-linux-gnu/lib $rootfs
-# Runtime lib with debug symbol
-mkdir $rootfs/lib
-cp -a /usr/aarch64-linux-gnu/lib/debug/lib/aarch64-linux-gnu/* $rootfs/lib
+# Runtime lib without debug symbol in remote server
+cp -a /usr/aarch64-linux-gnu/lib $rootfs/
+rm -rf $rootfs/lib/debug/
 
 mkdir $rootfs/proc
 mkdir $rootfs/mnt

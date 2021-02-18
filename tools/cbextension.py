@@ -77,19 +77,19 @@ def prog_cmd(num, *cmdlist):
 
 
 def cb_new_inferior_handler(event):
-    event.inferior
+    pass # event.inferior
 
 
 def cb_exited_handler(event):
-    event.inferior, event.exit_code
+    pass # event.inferior, event.exit_code
 
 
 def cb_stop_handler(event):
-    event.stop_signal, event.breakpoints
+    pass # event.stop_signal, event.breakpoints
 
 
 def cb_cont_handler(event):
-    event.inferior_thread
+    pass # event.inferior_thread
 
 
 def cb_notify_event(args):
