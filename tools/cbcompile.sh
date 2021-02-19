@@ -19,5 +19,10 @@ log=$src.log
 GCC=aarch64-linux-gnu-gcc
 CBCC=./cbcc
 
+export LANGUAGE=zh_CN
+
 # $CBCC $src -o $dst
+OPTIONS="-fdiagnostics-format=json
+         -fdiagnostics-parseable-fixits
+         -Werror=implicit-function-declaration"
 $GCC -g -o $dst $src >$log 2>&1

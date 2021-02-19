@@ -33,13 +33,13 @@ def prog_begin(filename, pk):
 
     def _runner():
         i = gdb.selected_inferior()
-        if i.is_valid() and i.progspace.filename is None:
-            gdb.execute('set remote exec-file %s' % filename)
-        else:
+        if i.progspace.filename is not None:
             res = gdb.execute('add-inferior -no-connection', False, True)
             n = res.split()[-1]
             gdb.execute('inferior %s' % n)
-            gdb.execute('set remote exec-file %s' % filename)
+        gdb.execute('set remote exec-file %s' % filename)
+        gdb.execute('file %s' % filename)
+        gdb.execute('start')
         gdb.flush()
         cb_notify_event({
             'event': 'begin_prog',
