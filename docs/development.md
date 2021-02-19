@@ -141,11 +141,18 @@ qemu-system-aarch64 -machine virt -cpu cortex-a57 -machine type=virt -nographic 
 
     /usr/local/bin/gdbserver 10.0.2.15:20600 /opt/codebang/share/a.out
 
+    /usr/local/bin/gdbserver --multi 10.0.2.15:20600 &
+
 在主机端使用 gdb-multiarch 连接
 
     gdb-multiarch /opt/codebang/share/a.out
     (gdb) target remote localhost:20600
     (gdb) c
+
+    gdb-multiarch
+    (gdb) target extended-remote localhost:20600
+    (gdb) set remote exec-file /opt/codebang/share/a.out
+    (gdb) run
 
 ## glibc arm64 调试
 
@@ -153,3 +160,30 @@ qemu-system-aarch64 -machine virt -cpu cortex-a57 -machine type=virt -nographic 
 
     apt install libc6-dev-arm64-cross libc6-dbg-arm64-cross
     dpkg -L libc6-dbg-arm64-cross
+
+目前的方式是替换 `/usr/aarch64-linux-gnu/lib/libc-2.31.so` 为调试版本
+`/usr/aarch64-linux-gnu/lib/debug/lib/aarch64-linux-gnu/libc-2.31.so`
+
+还需要把 `glibc-2.31` 的源码拷贝到 `/opt/codebang/build` 下面，然后在 `gdb` 中设
+置 `sysroot` 和 `substitute-path` ，这样就可以正确显示符号
+
+    (gdb) set debug aarch64 on
+    (gdb) set sysroot /usr/aarch64-linux-gnu
+    (gdb) set substitute-path /build/cross-toolchain-base-vwSSmv/cross-toolchain-base-43ubuntu3.1 /opt/codebang/build
+    (gdb) file /opt/codebang/share/a.out
+    (gdb) start
+
+## gcc 显示中文错误信息
+
+增加中文支持，修改 `/etc/locale.gen` ， 把 `zh_CN.UTF-8` 所在的行注释去掉，然后
+运行
+
+    locale-gen
+
+因为默认使用的 `gcc-9` ，所以 `gcc` 总是去找 `gcc-9.mo` ，但是默认装的只有
+`gcc.mo` ，所以需要人工创建一个连接
+
+    cd /usr/share/locale-langpack/zh_CN/LC_MESSAGES/
+    ln -s gcc.mo gcc-9.mo
+
+这样总算会显示中文消息了
