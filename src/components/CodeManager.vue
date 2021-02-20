@@ -410,6 +410,8 @@ export default {
                 } )
                 return
             }
+
+            // Refer to gcc-docs/gcc/Diagnostic-Message-Formatting-Options.html
             let ranges = []
             let i = details.indexOf( '[{' )
             let j = -1
@@ -442,10 +444,10 @@ export default {
                     text: r.message,
                     type: r.kind === 'note' ? 'info' : r.kind
                 }
-            }))
+            } ) )
 
             this.$refs.editor.execCommand( 'goToNextError' )
-        }
+        },
 
         //
         // onCourseworkXXX
