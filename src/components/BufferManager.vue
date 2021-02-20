@@ -127,6 +127,9 @@ export default {
                             buf.coursework.state = 0
                         }
                     } )
+                    // if ( ! buf.session.getUndoManager().canUndo() )
+                    //     buf.coursework.state = 0;
+                    // else
                     connector.updateCourseworkContent( buf.coursework, buf.session.getValue() )
                 }
             } )

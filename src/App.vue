@@ -17,6 +17,7 @@
         @click="pageIndex=0"
         type="text">{{ $t( '代码' ) }}</el-button>
       <el-button
+        style="display: none"
         @click="pageIndex=1"
         type="text">{{ $t( '编译' ) }}</el-button>
       <el-button
@@ -106,6 +107,13 @@ export default {
         connector.$on( 'api-get-logon', (success, data) => {
             if (success)
                 this.logonName = data.username
+        } )
+
+        connector.$on( 'api-build-coursework', (success, data) => {
+            if (success) {
+                this.pageIndex = 2
+                this.buildData = data
+            }
         } )
 
         this.isAuthenticated = connector.isAuthenticated

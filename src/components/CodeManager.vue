@@ -402,6 +402,50 @@ export default {
                 this.$refs.editor.handleCourseworkClose( coursework )
             }
         },
+        resetBuildErrors: function ( buf, details ) {
+            if ( ! buf ) {
+                this.$message( {
+                    type: 'warning',
+                    message: details
+                } )
+                return
+            }
+            let ranges = []
+            let i = details.indexOf( '[{' )
+            let j = -1
+
+            while ( i !== -1 ) {
+                if ( ! i || details[ i - 1 ] === '\n' ) {
+                    j = details.indexOf( '\n', i )
+                    if ( j === -1 && details.slice( -2 ) === '}]' ) {
+                        ranges = JSON.parse( details.slice( i ) )
+                        break
+                    }
+                    else if ( j > 2 && details.slice( j - 2, j ) === '}]' ) {
+                        ranges = JSON.parse( details.slice( i, j ) )
+                        this.$message( {
+                            type: 'warning',
+                            message: details.slice( j + 1 )
+                        } )
+                        break
+                    }
+                }
+
+                i = details.indexOf( '[{', i + 2 )
+            }
+
+            buf.session.setAnnotations( ranges.map( function( r ) {
+                const loc = r.locations[0]
+                return {
+                    row: loc.caret.line,
+                    column: loc.caret.column,
+                    text: r.message,
+                    type: r.kind === 'note' ? 'info' : r.kind
+                }
+            }))
+
+            this.$refs.editor.execCommand( 'goToNextError' )
+        }
 
         //
         // onCourseworkXXX
@@ -472,12 +516,18 @@ export default {
             }
         },
         handleCourseworkBuild: function ( coursework ) {
-            if ( coursework && coursework.state === COMPILED )
-                this.pageIndex = 2
-            else if ( coursework ) {
-                connector.$once( 'api-build-coursework', success => {
-                    if ( ! success )
-                        this.$message( _t( '编译出错了' ) )
+            if ( coursework && coursework.state !== COMPILED ) {
+                let buf = this.$refs.editor.getBuffer( coursework )
+                if ( buf )
+                    buf.session.clearAnnotations()
+                connector.$once( 'api-build-coursework', ( success, data ) => {
+                    if ( ! success ) {
+                        if ( ! data.detail )
+                            this.$message( _t( '编译出错了' ) )
+                        else {
+                            this.resetBuildErrors( buf, data.detail )
+                        }
+                    }
                 } )
                 connector.buildCoursework( coursework )
             }

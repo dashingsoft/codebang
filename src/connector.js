@@ -7,17 +7,17 @@ import { _t } from './plugins/gettext.js'
 const ACCESS_TOKEN_KEY = 'ACCESS_TOKEN'
 const REFRESH_TOKEN_KEY = 'REFRESH_TOKEN'
 
-// const serverUrl = 'http://localhost:9092'
-// const clientId = '0gvr1GFNpCy9fSpxsKHPdUPUu7ZSCQS76zc8kAgl'
-// const clientSecret = 'dazoA4IhCGrWrkh2rA02FE1qm3AVWdAz9qKqSZDLAD22xWiVYsEeMtq2BmqVY748U8Qw9jecBo9BHYYG3nZDgOUUwaEFjjDir1VX25ejnCvEcwdzV3Wt2Rxcnt45lxaN'
+const serverUrl = 'http://localhost:9092/api/v1'
+const clientId = '0gvr1GFNpCy9fSpxsKHPdUPUu7ZSCQS76zc8kAgl'
+const clientSecret = 'dazoA4IhCGrWrkh2rA02FE1qm3AVWdAz9qKqSZDLAD22xWiVYsEeMtq2BmqVY748U8Qw9jecBo9BHYYG3nZDgOUUwaEFjjDir1VX25ejnCvEcwdzV3Wt2Rxcnt45lxaN'
 
 // const serverUrl = 'https://codebang.dashingsoft.com'
 // const clientId = 'rgt9yKrM82ACFiKLW2aIwxYUCIUV8ggx2OH5hvu8'
 // const clientSecret = 'hiWi4Q8k4TR1aAF8PGtqjL7DiY15gBFXjYQ9UM5F3EV5mneJbo88LlXqst0PcfpYVhPQyKc1jjlICggI0otTjOv6zoP89Q0uBNoLsEqkRVmi2G4w5Snn9dBADHx7UxaT'
 
-const serverUrl = 'https://cb.dashingsoft.com/api/v1'
-const clientId = 'PetTAmGzfinaiKDcr8wAfuq2IGqYv2TfWBHuou2F'
-const clientSecret = 'SLc0LAGCyPQ291V2f3XSpK1xyBde01SHy9hZ5l2FQbrEbd17J9ZSlT8VXDWpsHMre4JqA7F8Olr6SDOQuR5Ul8D7U5PaFopiARASA8vIudRBsh2RAWqfO6Iu14Dtc5bq'
+// const serverUrl = 'https://cb.dashingsoft.com/api/v1'
+// const clientId = 'PetTAmGzfinaiKDcr8wAfuq2IGqYv2TfWBHuou2F'
+// const clientSecret = 'SLc0LAGCyPQ291V2f3XSpK1xyBde01SHy9hZ5l2FQbrEbd17J9ZSlT8VXDWpsHMre4JqA7F8Olr6SDOQuR5Ul8D7U5PaFopiARASA8vIudRBsh2RAWqfO6Iu14Dtc5bq'
 
 // Fix this issue:
 //   Do not access Object.prototype method ‘hasOwnProperty’ from target object no-prototype-builtins
@@ -336,7 +336,7 @@ export default new Vue({
             this.sendRequest(api, make_multipart_data(args, files), 'api-update-coursework-content')
         },
         buildCoursework: function (coursework) {
-            let timeout = 15000
+            let timeout = 5000
             const loading = this.$loading( {
                 lock: true,
                 text: _t( '正在编译 ' ) + coursework.name + ' ...',
@@ -344,17 +344,18 @@ export default new Vue({
                 background: 'rgba(0, 0, 0, 0.7)'
             } )
 
-            const retry = function ( coursework ) {
-                this.$once( 'api-build', ( success, data ) => {
+            const retry = function ( ) {
+
+                this.$once( 'api-build-result', ( success, data ) => {
 
                     let result = false
                     if ( success ) {
-                        if ( data.state === 'SUCCESS' ) {
+                        if ( data.state === 2 ) {
                             loading.close()
                             coursework.state = COMPILED
                             result = true
                         }
-                        else if ( data.state === 'FAILURE' ) {
+                        else if ( data.state === -1 ) {
                             loading.close()
                             coursework.state = FAILURE
                         }
@@ -363,8 +364,8 @@ export default new Vue({
                             coursework.state = TIMEOUT
                         }
                         else {
-                            timeout -= 3000
-                            window.setTimeout( retry, 3000, coursework )
+                            timeout -= 1000
+                            window.setTimeout( retry, 1000 )
                             result = null
                         }
                     }
@@ -372,43 +373,29 @@ export default new Vue({
                         loading.close()
 
                     if ( result !== null )
-                        this.$emit( 'api-build-coursework', result )
+                        this.$emit( 'api-build-coursework', result, data )
                 } )
 
-                const api = '/courseworks/' + coursework.id + '/build/'
-                this.sendRequest(api, { data: coursework }, 'api-build')
+                const api = '/courseworks/' + coursework.id + '/result/'
+                this.sendRequest(api, { data: coursework }, 'api-build-result')
 
             }.bind( this )
 
-            this.$once( 'api-rebuild', ( success, data ) => {
+            this.$once( 'api-build', ( success ) => {
 
-                let result = false
                 if ( success ) {
-                    if ( data.state === 'SUCCESS' ) {
-                        loading.close()
-                        coursework.state = COMPILED
-                        result = true
-                    }
-                    else if ( data.state === 'FAILURE' ) {
-                        loading.close()
-                        coursework.state = FAILURE
-                    }
-                    else {
-                        retry( coursework )
-                        result = null
-                    }
+                    window.setTimeout( retry, 3000 )
                 }
-                else
+                else {
                     loading.close()
+                    this.$emit( 'api-build-coursework', false )
+                }
 
-                if ( result !== null )
-                    this.$emit( 'api-build-coursework', result )
-
-            } ).bind( this )
+            } )
 
             coursework.state = BUILDING
-            const api = '/courseworks/' + coursework.id + '/rebuild/'
-            this.sendRequest(api, { data: coursework }, 'api-rebuild')
+            const api = '/courseworks/' + coursework.id + '/build/'
+            this.sendRequest(api, { data: coursework }, 'api-build')
         },
         taskCoursework: function (coursework) {
             const api = '/courseworks/' + coursework.id + '/result/'
