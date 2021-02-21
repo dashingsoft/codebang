@@ -26,6 +26,7 @@
       <div class="cb-title">
         {{ title }}
       </div>
+      <yix-controlbar v-show="pageIndex==2"></yix-controlbar>
       <div class="cb-toolbox">
         <el-button
           icon="el-icon-bell"
@@ -222,7 +223,6 @@ body {
 
 .cb-title {
     background-color: #3f3f3f;
-    flex-grow: 1;
     text-align: center;
     margin-left: 16px;
     margin-right: 16px;

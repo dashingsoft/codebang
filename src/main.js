@@ -9,6 +9,9 @@ import LoginDialog from './components/LoginDialog.vue'
 import I18nPlugin from './plugins/gettext.js'
 Vue.use(I18nPlugin)
 
+import EngineerPlugin from 'yix-engineer/src/lib.js'
+Vue.use(EngineerPlugin)
+
 import './plugins/element.js'
 
 Vue.config.productionTip = false

@@ -52,5 +52,7 @@ export default {
 
 <style>
 .cb-launcher {
+    background: #fff;
+    height: 100%;
 }
 </style>
