@@ -79,6 +79,28 @@ const error_callback = function (req, msg, err) {
     } )
 }
 
+const register_user = function (username, password, success, fail) {
+    const url = serverUrl + '/signup/'
+    const data = {
+        username: username,
+        password: password
+    }
+    reqwest( {
+        url: url,
+        method: 'post',
+        type: 'json',
+        contentType: 'application/x-www-form-urlencoded',
+        data: data,
+        crossOrigin: crossOrigin,
+        success: success,
+        error: resp => {
+            fail( resp.status === 400
+                  ? JSON.parse(resp.responseText).username
+                  : resp.responseText )
+        }
+    } )
+}
+
 const request_token = function (url, data, callback) {
     reqwest( {
         url: url,
@@ -251,6 +273,12 @@ export default new Vue({
                 } )
                 request_api(api, method, paras, callback, vnode.close)
             }
+        },
+        signup: function (username, password) {
+            register_user(username, password,
+                          () => this.login(username, password),
+                          msg => this.showError(msg)
+                         )
         },
         login: function (username, password, silent) {
             const callback = function (success, result) {

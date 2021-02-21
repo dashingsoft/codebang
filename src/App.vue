@@ -5,14 +5,6 @@
         <img src="./assets/logo.png">
         <span>{{ $t( '代码帮' ) }} </span>
       </div>
-      <div class="cb-searchbox" style="display: none;">
-        <el-input
-          :placeholder="$t( '请输入搜索内容' )"
-          prefix-icon="el-icon-search"
-          size="mini"
-          clearable>
-        </el-input>
-      </div>
       <el-button
         @click="pageIndex=0"
         type="text">{{ $t( '代码' ) }}</el-button>
@@ -23,8 +15,16 @@
       <el-button
         @click="pageIndex=2"
         type="text">{{ $t( '运行' ) }}</el-button>
-      <div class="cb-title">
+      <div class="cb-title" v-show="pageIndex==0" style="flex-grow: 1">
         {{ title }}
+      </div>
+      <div class="cb-searchbox" v-show="pageIndex==0">
+        <el-input
+          :placeholder="$t( '请输入搜索内容' )"
+          prefix-icon="el-icon-search"
+          size="mini"
+          clearable>
+        </el-input>
       </div>
       <yix-controlbar v-show="pageIndex==2"></yix-controlbar>
       <div class="cb-toolbox">
@@ -217,8 +217,22 @@ body {
     color: #ccc;
 }
 
+.cb-navbar .y-controlbox {
+    flex-grow: 1;
+}
+
+.cb-navbar .y-controlbox button {
+    color: #f8f8f8;
+    background: #333;
+}
+
+.cb-navbar .y-controlbox button:hover {
+    color: #ccc;
+    background: #333;
+}
+
 .cb-toolbox > * {
-    padding-left: 9px;
+    padding-left: 16px;
 }
 
 .cb-title {
@@ -226,6 +240,8 @@ body {
     text-align: center;
     margin-left: 16px;
     margin-right: 16px;
+    padding-left: 16px;
+    flex-grow: 1;
 }
 
 .cb-brand {
