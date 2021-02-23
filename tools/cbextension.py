@@ -11,11 +11,15 @@ from urllib.parse import urlencode
 cb_notify_url = 'http://localhost:20829/api/v1/event/gdb/'
 
 
-def cb_post_event(runner):
-    if not cb_lock.acquire(timeout=1.0):
-        return None
-    runner()
-    cb_lock.release()
+def cb_post_event(runner, pk=None):
+    if cb_lock.acquire(timeout=1.0):
+        runner()
+        cb_lock.release()
+    elif pk is not None:
+        cb_notify_event({
+            'pk': pk,
+            'error': 'Timeout'
+        })
 
 
 def cb_execmd(*cmdlist):
@@ -67,13 +71,13 @@ def cb_prog_end(pk, num):
     cb_post_event(_runner)
 
 
-def cb_prog_cmd_async(pk, cmd, arg='', thread='$_thread'):
+def cb_prog_cmd_async(pk, cmd, arg='', thread=None):
     # run / step / stepi / next / nexti / continue / until / finish &
-    cmdstr = 'thread apply %s -s %s %s &' % (thread, cmd, arg)
+    cmdlist = [] if thread is None else ['thread apply', thread, '-s']
+    cmdlist.extend([cmd, arg, '&'])
 
     def _runner():
-        result = gdb.execute(cmdstr, False, True)
-        gdb.flush()
+        result = gdb.execute(' '.join(cmdlist), False, True)
         cb_notify_event({
             'pk': pk,
             'result': result
@@ -82,7 +86,7 @@ def cb_prog_cmd_async(pk, cmd, arg='', thread='$_thread'):
     cb_post_event(_runner)
 
 
-def cb_prog_cmd(pk, cmd, arg='', thread='$_gthread', frame='0'):
+def cb_prog_cmd(pk, cmd, arg='', thread=None, frame=None):
     # -stack-list-variables --thread 1 --frame 0 --all-values
     # ^done,variables=[{name="x",value="11"},{name="s",value="{a = 1, b = 2}"}]
 
@@ -139,13 +143,15 @@ def cb_prog_cmd(pk, cmd, arg='', thread='$_gthread', frame='0'):
     # -break-enable
     # -break-watch
 
-    cmdstr = ' '.join(['interpreter-exec mi', '"', cmd,
-                       '--thread', thread, '--frame', frame, arg,
-                       '"']
+    cmdlist = ['interpreter-exec mi', '"', cmd]
+    if thread is not None:
+        cmdlist.extend(['--thread', thread])
+    if frame is not None:
+        cmdlist.extend(['--frame', frame])
+    cmdlist.extend([arg, '"'])
 
     def _runner():
-        result = gdb.execute(cmdstr, False, True)
-        gdb.flush()
+        result = gdb.execute(' '.join(cmdlist), False, True)
         cb_notify_event({
             'pk': pk,
             'result': result
@@ -175,16 +181,23 @@ def cb_exited_handler(event):
 
 def cb_new_thread_handler(event):
     thread = event.inferior_thread
-    cb_notify_event({
-        'inferior': thread.inferior.num,
-        'thread': thread.num,
-        'gthread': thread.global_num,
-        'state': 'new',
-    })
+    if isinstance(thread, gdb.Inferior):
+        cb_notify_event({
+            'inferior': thread.num,
+            'state': 'new',
+        })
+    else:
+        cb_notify_event({
+            'inferior': thread.inferior.num,
+            'thread': thread.num,
+            'gthread': thread.global_num,
+            'state': 'new',
+        })
 
 
 def cb_stop_handler(event):
     thread = event.inferior_thread
+    gdb.write('stop_handler: %s' % type(thread))
     if hasattr(event, 'breakpoints'):
         reason = [(bp.thread, bp.number, bp.type, bp.location)
                   for bp in event.breakpoints]
@@ -192,13 +205,21 @@ def cb_stop_handler(event):
         reason = event.stop_signal
     else:
         reason = ''
-    cb_notify_event({
-        'inferior': thread.inferior.num,
-        'thread': thread.num,
-        'gthread': thread.global_num,
-        'state': 'exited' if thread.is_exited() else 'stopped',
-        'reason': reason
-    })
+
+    if isinstance(thread, gdb.Inferior):
+        cb_notify_event({
+            'inferior': thread.num,
+            'state': 'exited' if thread.is_exited() else 'stopped',
+            'reason': reason
+        })
+    else:
+        cb_notify_event({
+            'inferior': thread.inferior.num,
+            'thread': thread.num,
+            'gthread': thread.global_num,
+            'state': 'exited' if thread.is_exited() else 'stopped',
+            'reason': reason
+        })
 
 
 def cb_cont_handler(event):
