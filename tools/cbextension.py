@@ -181,6 +181,9 @@ def cb_exited_handler(event):
 
 def cb_new_thread_handler(event):
     thread = event.inferior_thread
+    if thread is None:
+        return
+
     if isinstance(thread, gdb.Inferior):
         cb_notify_event({
             'inferior': thread.num,
@@ -197,7 +200,9 @@ def cb_new_thread_handler(event):
 
 def cb_stop_handler(event):
     thread = event.inferior_thread
-    gdb.write('stop_handler: %s' % type(thread))
+    if thread is None:
+        return
+
     if hasattr(event, 'breakpoints'):
         reason = [(bp.thread, bp.number, bp.type, bp.location)
                   for bp in event.breakpoints]
@@ -224,11 +229,20 @@ def cb_stop_handler(event):
 
 def cb_cont_handler(event):
     thread = event.inferior_thread
-    cb_notify_event({
-        'inferior': thread.inferior.num,
-        'thread': thread.num,
-        'state': 'running',
-    })
+    if thread is None:
+        return
+
+    if isinstance(thread, gdb.Inferior):
+        cb_notify_event({
+            'inferior': thread.num,
+            'state': 'running'
+        })
+    else:
+        cb_notify_event({
+            'inferior': thread.inferior.num,
+            'thread': thread.num,
+            'state': 'running',
+        })
 
 
 def cb_notify_event(args):
