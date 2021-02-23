@@ -1,7 +1,7 @@
 <template>
   <div class="cb-user">
       <el-dialog
-        width="25%"
+        width="45%"
         :visible="dialogVisible"
         :close-on-click-modal="false"
         :before-close="handleDialogClose">
