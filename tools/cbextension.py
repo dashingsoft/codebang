@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-'''GDB Extension
-'''
+'''Unused gdb Extension'''
+
 import gdb
 import threading
 
@@ -87,6 +87,8 @@ def cb_prog_cmd_async(pk, cmd, arg='', thread=None):
 
 
 def cb_prog_cmd(pk, cmd, arg='', thread=None, frame=None):
+    '''It doesn't work to run mi command by gdb.execute'''
+
     # -stack-list-variables --thread 1 --frame 0 --all-values
     # ^done,variables=[{name="x",value="11"},{name="s",value="{a = 1, b = 2}"}]
 
@@ -247,9 +249,12 @@ def cb_cont_handler(event):
 
 def cb_notify_event(args):
     data = urlencode(args)
-    r = urlopen(cb_notify_url, data.encode('ascii'))
-    if r.status == 200:
-        return r.read().decode('utf-8')
+    try:
+        r = urlopen(cb_notify_url, data.encode('ascii'))
+        if r.status == 200:
+            return r.read().decode('utf-8')
+    except Exception:
+        pass
 
 
 #
