@@ -25,4 +25,4 @@ export LANGUAGE=zh_CN
 OPTIONS="-fdiagnostics-format=json
          -fdiagnostics-parseable-fixits
          -Werror=implicit-function-declaration"
-$GCC -g -o $dst $src >$log 2>&1
+$GCC -g $OPTIONS -o $dst $src >$log 2>&1
