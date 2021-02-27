@@ -134,8 +134,8 @@ export default {
 
         return {
             ruleForm: {
-                name: '',
-                pass: '',
+                name: 'demo',
+                pass: 'demo',
                 checkPass: '',
             },
             rules: {
