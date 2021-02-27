@@ -9,6 +9,9 @@ import LoginDialog from './components/LoginDialog.vue'
 import I18nPlugin from './plugins/gettext.js'
 Vue.use(I18nPlugin)
 
+// Dynamic import
+// import('yix-engineer/src/lib.js')
+//     .then(EngineerPlugin => Vue.use(EngineerPlugin))
 import EngineerPlugin from 'yix-engineer/src/lib.js'
 Vue.use(EngineerPlugin)
 
