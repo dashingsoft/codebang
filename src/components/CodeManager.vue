@@ -425,10 +425,12 @@ export default {
                     }
                     else if ( j > 2 && details.slice( j - 2, j ) === '}]' ) {
                         ranges = JSON.parse( details.slice( i, j ) )
-                        this.$message( {
-                            type: 'warning',
-                            message: details.slice( j + 1 )
-                        } )
+                        if ( details.length > j + 2 ) {
+                            this.$message( {
+                                type: 'warning',
+                                message: details.slice( j + 1 )
+                            } )
+                        }
                         break
                     }
                 }
@@ -439,7 +441,7 @@ export default {
             buf.session.setAnnotations( ranges.map( function( r ) {
                 const loc = r.locations[0]
                 return {
-                    row: loc.caret.line,
+                    row: loc.caret.line - 1,
                     column: loc.caret.column,
                     text: r.message,
                     type: r.kind === 'note' ? 'info' : r.kind
@@ -660,7 +662,7 @@ export default {
 
 /* Status */
 .cb-red-dot::after {
-    background-color: rgba(245, 110, 110, 0.3);
+    background-color: rgba(245, 110, 110, 0.38);
     content: '';
     height: 9px;
     width: 9px;
@@ -670,7 +672,7 @@ export default {
     border-radius: 50%;
 }
 .cb-tag-warning::after {
-    background-color: rgba(227, 162, 195, 0.3);
+    background-color: #e6a23c;
     content: '';
     height: 9px;
     width: 9px;
