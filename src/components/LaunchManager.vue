@@ -1,10 +1,12 @@
 <template>
   <div class="cb-launcher">
-    <yix-engineer>This is launcher for CodeBang</yix-engineer>
+    <yix-engineer ref="engineer">This is launcher for CodeBang</yix-engineer>
   </div>
 </template>
 
 <script>
+import Vue from "vue"
+import { RealComputer } from 'yix-engineer/src/lib.js'
 import connector from '../connector.js'
 
 export default {
@@ -23,6 +25,12 @@ export default {
             if (success)
                 connector.getLogon()
         } )
+        let engineer = this.$refs.engineer
+        Vue.prototype.$i_engineer = engineer
+
+        const RealComputerObject = Vue.extend( RealComputer )
+        let computer = new RealComputerObject()
+        engineer.initMainDomain( computer )
     },
     methods: {
         runCodeWithArguments ( obj, args ) {
@@ -52,5 +60,7 @@ export default {
 
 <style>
 .cb-launcher {
+    background: #fff;
+    height: 100%;
 }
 </style>

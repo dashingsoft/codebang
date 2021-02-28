@@ -1,7 +1,7 @@
 <template>
   <div class="cb-user">
       <el-dialog
-        width="25%"
+        width="45%"
         :visible="dialogVisible"
         :close-on-click-modal="false"
         :before-close="handleDialogClose">
@@ -13,7 +13,7 @@
           label-width="auto"
           class="ruleForm">
           <el-form-item label="账户" prop="name">
-            <el-input v-model="ruleForm.name" autocomplete="off" placeholder="用户名/邮箱/手机号"></el-input>
+            <el-input v-model="ruleForm.name" autocomplete="off" placeholder="用户名"></el-input>
           </el-form-item>
           <el-form-item v-if="!isRetrivePass" label="密码" prop="pass">
             <el-input type="password" v-model="ruleForm.pass" autocomplete="off" show-password></el-input>
@@ -134,8 +134,8 @@ export default {
 
         return {
             ruleForm: {
-                name: '',
-                pass: '',
+                name: 'demo',
+                pass: 'demo',
                 checkPass: '',
             },
             rules: {
@@ -188,7 +188,7 @@ export default {
             if(this.isRegister) {
                 this.$refs[formName].validate((valid) => {
                     if (valid) {
-                        connector.showError("现在还不能注册");
+                        connector.signup(this.ruleForm.name, this.ruleForm.pass);
                         return true;
                     }
                     return false;
