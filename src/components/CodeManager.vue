@@ -149,9 +149,14 @@
         </el-table>
       </div>
     </el-aside>
-    <div class="cb-container">
-      <cb-buffer-manager ref="editor"></cb-buffer-manager>
-    </div>
+    <el-container>
+        <el-main>
+            <div class="cb-container">
+                <cb-buffer-manager ref="editor"></cb-buffer-manager>
+            </div>
+        </el-main>
+        <el-footer class="cb-codefooter" :style="termStyle"><div id="terminal"></div></el-footer>
+    </el-container>
   </el-container>
 </template>
 
@@ -159,11 +164,16 @@
 import { DIRTY, COMPILED, FAILURE, TIMEOUT, BUILDING } from '../definition.js'
 import connector from '../connector.js'
 import { _t } from '../plugins/gettext.js'
+import { Range } from 'ace-builds'
+import { Terminal } from 'xterm'
+import { FitAddon } from 'xterm-addon-fit'
+import 'xterm/css/xterm.css'
 
 export default {
     name: 'CodeManager',
     props: {
         courseId: Number,
+        terminal: Terminal,
     },
     computed: {
         title: function () {
@@ -186,6 +196,7 @@ export default {
             tempCourseworks: [],
             loadingCourse: false,
             cachedData: { 'pk_0': [] },
+            termStyle: {height: '0px'},
         }
     },
     mounted() {
@@ -448,7 +459,24 @@ export default {
                 }
             } ) )
 
-            this.$refs.editor.execCommand( 'goToNextError' )
+            for( var index in ranges ) {
+                const _start = ranges[index].locations[0].caret
+                const _end = ranges[index].locations[0].finish
+                var _range = new Range(_start.line - 1, _start.column - 1, _end.line - 1, _end.column)
+                buf.session.addMarker(_range, "cb-gcc-error", "text", false)
+
+                if (!this.terminal) {
+                    this.terminal = new Terminal()
+                    var fitAddon = new FitAddon();
+                    this.terminal.loadAddon(fitAddon);
+                }
+
+                this.termStyle = {height: '200px'}
+
+                this.terminal.open(document.getElementById('terminal'))
+                this.terminal.writeln('line ' + _start.line + ': ' + ranges[index].message)
+                fitAddon.fit()
+            }
         },
 
         //
@@ -597,7 +625,7 @@ export default {
 </script>
 
 <style>
-/* Color themem */
+/* Color theme */
 .cb-coder .cb-card .el-input__inner,
 .cb-coder .cb-card .el-table,
 .cb-coder .cb-card .el-table * {
@@ -617,6 +645,17 @@ export default {
 .cb-coder .cb-card .el-table::before,
 .cb-coder .cb-card .el-table .el-table__fixed-right::before {
     background-color: #666;
+}
+
+.cb-gcc-error {
+    position: absolute;
+    /* z-index: 4;
+    text-decoration-line: underline;
+    text-decoration-style: wavy;
+    text-decoration-color: red; */
+
+    background: url('data:image/svg+xml;utf8,<svg version="1.1" xmlns="http://www.w3.org/2000/svg"><path d="M0 10 C-2 8,1 8, 4 11 S10 12,13 9 S19 8,22 11 S28 12,31 9" fill="none"  stroke-width="1" stroke="red"></path></svg>') repeat-x 0 100%;
+    background-size: auto 0.7em; 
 }
 
 /* Border, padding and margin */
@@ -680,5 +719,10 @@ export default {
     top: 2px;
     left: 2px;
     border-radius: 50%;
+}
+
+/** pattern */
+.xterm-viewport {
+    overflow: hidden !important;
 }
 </style>
