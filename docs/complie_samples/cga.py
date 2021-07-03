@@ -1,6 +1,7 @@
-from typing import List, Dict, Type
+import logging
+from typing import List, Dict
+
 from util import dict2ins, link_node
-import sys
 
 
 class LexSta:
@@ -90,6 +91,11 @@ class TokenNode(object):
         return self.get(self.key)
 
     def __eq__(self, other):
+        logging.info('self  key:' + self.key)
+        logging.info('other key:' + other.key)
+        logging.info('self  val:' + self.val)
+        logging.info('other val:' + other.val)
+
         if not other:
             return False
 
@@ -107,64 +113,14 @@ class TokenNode(object):
 
         return True
 
+    def __str__(self) -> str:
+        return str(self.__data)
+
 
 @link_node
-def make_token_list(tokens: List[Dict[str, str]]) -> List[Type[TokenNode]]:
+def make_token_list(tokens: List[Dict[str, str]]) -> List[TokenNode]:
     nodelist = []
     for token in tokens:
         d = {'data': token}
         nodelist.append(dict2ins(d, TokenNode))
     return nodelist
-
-
-if __name__ == '__main__':
-    i_file_path = sys.argv[0]
-    stub_data = '''# h1 text
-        ## h2 text
-        
-        ```c
-        int main() {
-            printf(a);
-            return 0;
-        }
-        ```
-        
-        ## errorinfo
-        ```
-        t1.c: In function ‘main’:
-        t1.c:2:5: warning: implicit declaration of function ‘printf’ [-Wimplicit-function-declaration]
-            2 |     printf(a);
-              |     ^~~~~~
-        t1.c:2:5: warning: incompatible implicit declaration of built-in function ‘printf’
-        t1.c:1:1: note: include ‘<stdio.h>’ or provide a declaration of ‘printf’
-          +++ |+#include <stdio.h>
-            1 | int main() {
-        t1.c:2:12: error: ‘a’ undeclared (first use in this function)
-            2 |     printf(a);
-              |            ^
-        t1.c:2:12: note: each undeclared identifier is reported only once for each function it appears in
-        ```
-        
-        ## h2 text2
-        
-        ```c
-        int main() {
-            printf("hello world");
-        }
-        ```
-        ## errorinfo
-        ```
-        t2.c: In function ‘main’:
-        t2.c:2:5: warning: implicit declaration of function ‘printf’ [-Wimplicit-function-declaration]
-            2 |     printf("hello world");
-              |     ^~~~~~
-        t2.c:2:5: warning: incompatible implicit declaration of built-in function ‘printf’
-        t2.c:1:1: note: include ‘<stdio.h>’ or provide a declaration of ‘printf’
-          +++ |+#include <stdio.h>
-            1 | int main() {
-        ```
-        '''
-
-    with open(i_file_path, 'w', encoding='utf-8') as f:
-        f.write(stub_data)
-        f.close()

@@ -26,7 +26,7 @@ flowchart TB
     end
     
     subgraph parser
-    _blocks_hunter[hunter]
+    _blocks_hunter[hunt]
     _insert[insert]
     end
 

@@ -1,4 +1,5 @@
 import logging
+import subprocess
 from time import time
 import os
 from typing import TypeVar
@@ -19,9 +20,16 @@ def write2file(text: str, ext='.md') -> str:
     return file_path
 
 
-def execute_cmd(cmd: str):
+def execute_in_sys(cmd: str) -> None:
     logging.info(cmd)
     os.system(cmd)
+
+
+def execute_in_shell(cmd: list) -> str:
+    logging.info(cmd)
+    res = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+    logging.info(res.stdout)
+    return res.stdout
 
 
 T = TypeVar('AnyClass')
