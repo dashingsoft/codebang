@@ -173,6 +173,11 @@ qemu-system-aarch64 -machine virt -cpu cortex-a57 -machine type=virt -nographic 
     (gdb) file /opt/codebang/share/a.out
     (gdb) start
 
+使用下面的方式查看动态库的源文件路径
+
+    (gdb) file /usr/aarch64-linux-gnu/lib/debug/lib/aarch64-linux-gnu/libc-2.31.so
+    (gdb) info sources
+
 ## gcc 显示中文错误信息
 
 增加中文支持，修改 `/etc/locale.gen` ， 把 `zh_CN.UTF-8` 所在的行注释去掉，然后
